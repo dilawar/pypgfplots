@@ -53,7 +53,7 @@ def indent( text, prefix = '  ' ):
         newLines.append( prefix + l )
     return '\n'.join( newLines )
 
-def addData( x, y, z, **kwargs ):
+def addData( x, y, z=[], **kwargs ):
     data = [ ]
     every = int( kwargs.get( 'every', 1 ))
 
@@ -61,15 +61,18 @@ def addData( x, y, z, **kwargs ):
     if x is None or len(x) < 1:
         x = np.arange( 0, len( y ), 1 )
 
-    if not z:
-        for a, b in zip( x[::every], y[::every] ):
-            data.append( ' ( %g, %g )' % (a, b ) )
-    else:
+    if len(z) > 0:
         # Matrix plot, insert a new line every time row index change.
         coords = [ 'x y meta' ]
         for a, b, c in zip( x[::every], y[::every], z[::every] ):
             coords.append('%s %s %s' % (a, b, c) )
         data.append( '\n'.join(coords) )
+    else:
+        coords = [ 'x y' ]
+        for a, b in zip( x[::every], y[::every] ):
+            coords.append( '%g %g' % (a, b ) )
+        data.append( '\n'.join( coords ) )
+
     dataTxt = indent( '\n'.join( data ), ' '*4 )
     return dataTxt 
 
@@ -103,7 +106,7 @@ def addPlot( x, y, z = [], legend = '', **kwargs ):
     text = _sub( 'plot_attribs', attribsText + kwargs.get( 'plot_attribs', '' ) , text )
 
     # Now attach data.
-    text = _sub( 'TABLEDATA', addData(x, y, z,**kwargs), text )
+    text = _sub( 'TABLEDATA', addData(x, y, z, **kwargs), text )
     return text
 
 def axis_template( **kwargs ):
@@ -177,7 +180,7 @@ def tikzpicture_template( **kwargs ):
     return text
 
 
-def tikzpicture( xs, ys, zs = [ ], **kwargs ):
+def tikzpicture( x, ys, **kwargs ):
     """tikzpicture. Convert given x, ys to  a tikzpicture.
 
     :param x: value on x-axis. 
@@ -185,22 +188,14 @@ def tikzpicture( xs, ys, zs = [ ], **kwargs ):
     :param **kwargs:
     """
     text = tikzpicture_template( **kwargs )
-    if xs is None:
-        xs, ys, zs = [ xs ], [ ys ], [ zs ]
-    elif not isinstance( xs[0], list ):
-        xs, ys, zs = [ xs ], [ ys ], [ zs ]
-    else:
-        pass
+    axisText = addAxis( x, ys, **kwargs )
+    text = _sub( 'AXISES', axisText, text )
+    return text 
 
-    axises = [ ]
-    for i, x in enumerate( xs ):
-        if not zs:
-            axisText = addAxis( x, ys[i], **kwargs )
-        else:
-            axisText = addAxisMatrix( x, ys[i], zs[i], **kwargs )
-        axises.append( axisText )
-
-    text = _sub( 'AXISES', '\n'.join( axises ), text )
+def tikzpicture_matrix( x, y, z, **kwargs ):
+    text = tikzpicture_template( **kwargs )
+    axisText = addAxisMatrix( x, y, z, **kwargs )
+    text = _sub( 'AXISES', axisText, text )
     return text 
 
 def tikzpicture3d( x, y, z, **kwargs ):
@@ -223,14 +218,13 @@ def matrixPlot( mat, **kwargs ):
         xs.append( x )
         ys.append( y )
         zs.append( z )
-    return tikzpicture( xs, ys, zs, **kwargs )
+    return tikzpicture_matrix( xs, ys, zs, **kwargs )
 
-def write_standalone( x, y, outfile = '', **kwargs ):
+def write_standalone( x, ys, outfile = '', **kwargs ):
     text = standalone_template( **kwargs )
     # For each x there could be multiple of ys.
-    pictureText = tikzpicture( x, y, **kwargs )
+    pictureText = tikzpicture( x, ys, **kwargs )
     text = _sub( 'TIKZPICTURE', pictureText, text )
-
     # Write to file or print to stdout.
     if outfile:
         print( 'Writing to %s' % outfile )
