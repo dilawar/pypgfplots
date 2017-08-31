@@ -6,6 +6,7 @@ python:
 before_script:
     - sudo apt install texlive-luatex  texlive-pictures
     - sudo apt install python-numpy python-matplotlib 
+    - sudo tlmgr install luatex85 shellesc
 
 script :
     - python ./test.py
