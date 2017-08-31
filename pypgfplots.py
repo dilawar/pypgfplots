@@ -164,7 +164,7 @@ def tikzpicture_template( **kwargs ):
     # if label is given, then attach a special node.
     label = kwargs.get( 'label', '' )
     if label:
-        res += [ '\\node[fill=none] at (rel axis cs:-0.1,1.2) {%s};' % label ]
+        res += [ '\\node[align=left] at (rel axis cs:-2,1.2) {%s};' % label ]
     res += [ '\end{tikzpicture}' ]
     text = '\n'.join( res )
 
