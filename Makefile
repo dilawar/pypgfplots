@@ -1,7 +1,12 @@
-all : test
+all : build test install
+	@echo "All done"
 
 build :
 	python -m compileall .
+	python setup.py build
+
+install :
+	python setup.py install
 
 test : ./test.py ./pypgfplots.py
 	python $<
