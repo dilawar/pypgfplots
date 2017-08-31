@@ -8,5 +8,5 @@ before_script:
     - sudo apt install python-numpy python-matplotlib 
 
 script :
-    - make
-    - find . -type f -name "*.tex" -print0 | xargs -I file pdflatex --shell-escape file
+    - make build
+    - make test
