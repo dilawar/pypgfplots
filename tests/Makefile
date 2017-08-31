@@ -3,8 +3,14 @@ TEXS:=$(TESTSCRIPTS:.py=.py.tex)
 PDFS:=$(TEXS:.tex=.pdf)
 PNGS:=$(PDFS:.pdf=.png)
 
-all : $(PDFS)
+all : test
+
+
+test : $(PDFS)
 	echo "Generated all pdf"
+
+png : $(PNGS)
+	echo "Generated PNGs"
 
 %.py.tex : %.py
 	PYTHONPATH=.. python $<
@@ -13,4 +19,4 @@ all : $(PDFS)
 	pdflatex $<
 
 %.png : %.pdf 
-	convert $< $@
+	convert -density 300 -quality 90 $< $@

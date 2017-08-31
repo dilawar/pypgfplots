@@ -53,15 +53,36 @@ def indent( text, prefix = '  ' ):
         newLines.append( prefix + l )
     return '\n'.join( newLines )
 
-def addPlot( x, y, legend = '', **kwargs ):
+def addData( x, y, z, **kwargs ):
+    data = [ ]
+    every = int( kwargs.get( 'every', 1 ))
+
+    # If x is empty or None, use index.
+    if x is None or len(x) < 1:
+        x = np.arange( 0, len( y ), 1 )
+
+    if not z:
+        for a, b in zip( x[::every], y[::every] ):
+            data.append( ' ( %g, %g )' % (a, b ) )
+    else:
+        # Matrix plot, insert a new line every time row index change.
+        coords = [ 'x y meta' ]
+        for a, b, c in zip( x[::every], y[::every], z[::every] ):
+            coords.append('%s %s %s' % (a, b, c) )
+        data.append( '\n'.join(coords) )
+    dataTxt = indent( '\n'.join( data ), ' '*4 )
+    return dataTxt 
+
+
+def addPlot( x, y, z = [], legend = '', **kwargs ):
     """ Add an axis to picture """
 
     res = [ ]
-    if kwargs.get( 'vergin_axis', False ):
-        res += [ '\\addplot [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
+    if kwargs.get( 'virgin_axis', False ):
+        res += [ '\\addplot [ ' + _m( 'plot_attribs' ) + '] table { ' ]
     else:
-        res += [ '\\addplot+ [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
-    res += [ _m( 'DATA' ) ]
+        res += [ '\\addplot+ [ ' + _m( 'plot_attribs' ) + '] table { ' ]
+    res += [ _m( 'TABLEDATA' ) ]
     res += [ '  };' ]
 
     # Add legend entry.
@@ -69,42 +90,28 @@ def addPlot( x, y, legend = '', **kwargs ):
         res += [ '\\addlegendentry{ %s };' % legend ]
     text = '\n'.join( res )
 
-    # These are default plot attributesi.
-    defaultPlotAttribs = [ ]
-    defaultPlotAttribsText = ', '.join( defaultPlotAttribs )
-    text = _sub( 'plot_attribs'
-            , defaultPlotAttribsText + kwargs.get( 'plot_attribs', '' ) 
-            , text )
+    # These are default plot attributes.
+    attribs = [ ]
+    # if z values are given then we are plotting a matrix plot.
+
+    if z:
+        nrows = int(max( x )) + 1
+        attribs += [ 'mesh/rows=%d' % nrows, 'matrix plot'
+                , 'point meta=\\thisrow{meta}', 'colormap name=hot' ]
+
+    attribsText = get_default_attribs( attribs, **kwargs )
+    text = _sub( 'plot_attribs', attribsText + kwargs.get( 'plot_attribs', '' ) , text )
 
     # Now attach data.
-    data = [ ]
-    every = int( kwargs.get( 'every', 1 ))
-
-    # If x is empty or None, use index.
-    if x is None or len(x) < 1:
-        x = np.arange( 0, len( y ), 1 )
-    for a, b in zip( x[::every], y[::every] ):
-        data.append( ' ( %g, %g )' % (a, b ) )
-
-    dataTxt = indent( '\n'.join( data ), ' '*4 )
-    text = _sub( 'DATA', dataTxt, text )
-
+    text = _sub( 'TABLEDATA', addData(x, y, z,**kwargs), text )
     return text
 
-def addAxis( x, ys, **kwargs ):
+def axis_template( **kwargs ):
     axis = [ '\\begin{axis}[ ' + _m( 'axis_attribs' ) + ' ] ' ]
-    # Attach axis.
-    legends = kwargs.get( 'legends', '' )
-    if not isinstance( legends, list ):
-        legends = legends.split( ',' )
-    series = [ ]
-    for i, y in enumerate( ys ):
-        l = ''
-        if len( legends ) > i:
-            l = legends[ i ]
-        axis.append( indent( addPlot( x, y, legend = l, **kwargs ), '  ' ) )
-    axis += [ '\\end{axis}' ]
+    axis += [ _m( "AXIS" ) ]
+    axis += [ "\\end{axis}\n" ]
     axisText = '\n'.join( axis )
+
     # Add these default axis attributes.
     defaultAxisAttribs = [ ]
     attribs = [ 'xlabel=', 'ylabel=', 'title='
@@ -116,14 +123,38 @@ def addAxis( x, ys, **kwargs ):
     axisText = _sub( 'axis_attribs', axisAttr , axisText )
     return axisText
 
-
-def toPGFPlot( xs, ys, **kwargs ):
-    """toPGFPlot Convert given x, ys to  a tikzpicture.
-
-    :param x: value on x-axis. 
-    :param ys: single or multiple y-axis values.
+def addAxis( x, ys, **kwargs ):
+    """addAxis An axis can have multiple y-series.
+    :param x:
+    :param ys:
+    :param zs:
     :param **kwargs:
     """
+    template = axis_template( **kwargs )
+    legends = kwargs.get( 'legends', '' )
+    if not isinstance( legends, list ):
+        legends = legends.split( ',' )
+    series = [ ]
+    for i, y in enumerate( ys ):
+        l = ''
+        if len( legends ) > i:
+            l = legends[ i ]
+        series.append( indent( addPlot( x, y, legend = l, **kwargs ), '  ' ) )
+    template = _sub( 'AXIS', '\n'.join( series ), template )
+    return template
+
+def addAxisMatrix( x, ys, zs, **kwargs ):
+    kwargs[ 'axis_attribs' ] = kwargs.get( 'axis_attribs', '' ) + ',colorbar'
+    template = axis_template( enlargelimits = 'false', **kwargs )
+    legends = kwargs.get( 'legends', '' )
+    if not isinstance( legends, list ):
+        legends = legends.split( ',' )
+    series = [ ]
+    series.append( indent( addPlot( x, ys, zs, legend = '', **kwargs ), '  ' ) )
+    template = _sub( 'AXIS', '\n'.join( series ), template )
+    return template
+
+def tikzpicture_template( **kwargs ):
     res = [ '\\begin{tikzpicture}[ %s ] ' % _m( 'tikzpicture_attribs' ) ]
     res += [ _m( 'AXISES' ) ]
     
@@ -143,16 +174,37 @@ def toPGFPlot( xs, ys, **kwargs ):
             , defaultPictureAttribsText + ', ' + pictureAttribsText
             , text )
 
-    if not isinstance( xs, list ):
-        xs, ys = [ xs ], [ ys ]
-    
+    return text
+
+
+def tikzpicture( xs, ys, zs = [ ], **kwargs ):
+    """tikzpicture. Convert given x, ys to  a tikzpicture.
+
+    :param x: value on x-axis. 
+    :param ys: single or multiple y-axis values.
+    :param **kwargs:
+    """
+    text = tikzpicture_template( **kwargs )
+    if xs is None:
+        xs, ys, zs = [ xs ], [ ys ], [ zs ]
+    elif not isinstance( xs[0], list ):
+        xs, ys, zs = [ xs ], [ ys ], [ zs ]
+    else:
+        pass
+
     axises = [ ]
     for i, x in enumerate( xs ):
-        axisText = addAxis( x, ys[i], **kwargs )
+        if not zs:
+            axisText = addAxis( x, ys[i], **kwargs )
+        else:
+            axisText = addAxisMatrix( x, ys[i], zs[i], **kwargs )
         axises.append( axisText )
 
     text = _sub( 'AXISES', '\n'.join( axises ), text )
     return text 
+
+def tikzpicture3d( x, y, z, **kwargs ):
+    return 'Not supported yet.'
 
 def standalone_template( **kwargs ):
     res = [ '% \RequirePackage{luatex85,shellesc}' ]
@@ -165,12 +217,18 @@ def standalone_template( **kwargs ):
     res += [ '\\end{document}' ]
     return '\n'.join( res )
 
+def matrixPlot( mat, **kwargs ):
+    xs, ys, zs = [ ], [ ], [ ]
+    for (x,y), z in np.ndenumerate( mat ):
+        xs.append( x )
+        ys.append( y )
+        zs.append( z )
+    return tikzpicture( xs, ys, zs, **kwargs )
+
 def write_standalone( x, y, outfile = '', **kwargs ):
     text = standalone_template( **kwargs )
     # For each x there could be multiple of ys.
-    if not isinstance( y, list ):
-        y = [ y ]
-    pictureText = toPGFPlot( x, y, **kwargs )
+    pictureText = tikzpicture( x, y, **kwargs )
     text = _sub( 'TIKZPICTURE', pictureText, text )
 
     # Write to file or print to stdout.
@@ -181,9 +239,6 @@ def write_standalone( x, y, outfile = '', **kwargs ):
     else:
         print( text )
 
-def toPGFPlot3( x, y, z, **kwargs ):
-    return ""
-
 def write_standalone_matrix( mat, outfile = '', **kwargs ):
     """write_standalone_matrix Given a 2d matrix, generate a pgfplot file.
     Matrix is a special case of 3d surf plot.
@@ -192,9 +247,16 @@ def write_standalone_matrix( mat, outfile = '', **kwargs ):
     :param outfile:
     :param **kwargs:
     """
+    # Make axis virgin.
+    kwargs[ 'virgin_axis' ] = True
     template = standalone_template( **kwargs )
-    print( template )
-
+    matrix = matrixPlot( mat, **kwargs )
+    text = _sub( 'TIKZPICTURE', matrix, template )
+    if outfile:
+        with open( outfile, 'w' ) as f:
+            f.write( text )
+    else:
+        print( text )
 
 if __name__ == '__main__':
     main()
