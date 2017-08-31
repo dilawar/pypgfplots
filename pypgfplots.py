@@ -56,8 +56,8 @@ def to_axis( x, y, **kwargs ):
         res += [ '  \\addplot [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
     else:
         res += [ '  \\addplot+ [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
+    res += [ _m( 'DATA' ) ]
     res += [ '  };' ]
-    res.append( _m( 'DATA' ) )
 
     # Close axis.
     res += [ '\end{axis}' ]
