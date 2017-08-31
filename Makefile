@@ -6,7 +6,7 @@ build :
 	python setup.py build
 
 install :
-	python setup.py install
+	python setup.py install --user
 
 test : ./test.py ./pypgfplots.py
 	python3 $<
