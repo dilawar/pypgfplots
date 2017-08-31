@@ -42,7 +42,7 @@ def get_default_attribs( listofkeyval, **kwargs ):
             key, val = a.split( '=', 1 )
             if kwargs.get( key, '' ):
                 val = kwargs[ key ]
-            default.append( b'%s=%s' % (key, clean(val) ) )
+            default.append( '%s=%s' % (key, clean(val) ) )
         else:
             default.append( clean( a ) )
     return ', '.join( default )
