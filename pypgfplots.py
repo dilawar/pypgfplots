@@ -154,7 +154,7 @@ def toPGFPlot( xs, ys, **kwargs ):
     text = _sub( 'AXISES', '\n'.join( axises ), text )
     return text 
 
-def standalone( x, y, outfile = '', **kwargs ):
+def write_standalone( x, y, outfile = '', **kwargs ):
     res = [ '% \RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
     res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
