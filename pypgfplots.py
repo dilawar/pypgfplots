@@ -41,7 +41,7 @@ def get_default_attribs( listofkeyval, **kwargs ):
         if '=' in a:
             key, val = a.split( '=', 1 )
             if kwargs.get( key, '' ):
-                val = kwargs[ key ]
+                val = '%s' % kwargs[ key ]
             default.append( '%s=%s' % (key, clean(val) ) )
         else:
             default.append( clean( a ) )
@@ -107,11 +107,13 @@ def addAxis( x, ys, **kwargs ):
     axisText = '\n'.join( axis )
     # Add these default axis attributes.
     defaultAxisAttribs = [ ]
-    attribs = [ 
-            'xlabel=', 'ylabel=', 'title=', 'legend style={draw=none,font=\footnotesize}' 
+    attribs = [ 'xlabel=', 'ylabel=', 'title='
+            , 'legend style={draw=none,font=\footnotesize}' 
+            , 'width=5cm', 'height=4cm'
             ] 
     defaultAxisAttribsText = get_default_attribs(  attribs, **kwargs ) 
-    axisText = _sub( 'axis_attribs', defaultAxisAttribsText, axisText )
+    axisAttr = defaultAxisAttribsText + ',' + kwargs.get( 'axis_attribs', '' )
+    axisText = _sub( 'axis_attribs', axisAttr , axisText )
     return axisText
 
 
@@ -136,7 +138,6 @@ def toPGFPlot( xs, ys, **kwargs ):
     defaultPictureAttribsText = get_default_attribs( 
          [ 'scale=1', 'xshift=0', 'yshift=0' ], **kwargs 
          )
-
     pictureAttribsText = kwargs.get( 'tikzpicture_attribs', '' )
     text = _sub( 'tikzpicture_attribs'
             , defaultPictureAttribsText + ', ' + pictureAttribsText
@@ -147,7 +148,6 @@ def toPGFPlot( xs, ys, **kwargs ):
     
     axises = [ ]
     for i, x in enumerate( xs ):
-
         axisText = addAxis( x, ys[i], **kwargs )
         axises.append( axisText )
 
@@ -164,8 +164,11 @@ def write_standalone( x, y, outfile = '', **kwargs ):
     res += [ _m( 'TIKZPICTURE' ) ]
     res += [ '\\end{document}' ]
     text = '\n'.join( res )
-    pictureText = toPGFPlot( x, y, **kwargs )
 
+    # For each x there could be multiple of ys.
+    if not isinstance( y, list ):
+        y = [ y ]
+    pictureText = toPGFPlot( x, y, **kwargs )
     text = _sub( 'TIKZPICTURE', pictureText, text )
 
     # Write to file or print to stdout.
