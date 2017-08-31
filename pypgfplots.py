@@ -118,12 +118,12 @@ def standalone( x, y, outfile = '', **kwargs ):
     res = [ '% \RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
 
-    res += [ '\documentclass[tikz,preview,multi=false]{standalone}' ]
-    res += [ '\usepackage{pgfplots}' ]
-    res += [ '\usepgfplotslibrary{groupplots}' ]
+    res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
+    res += [ '\\usepackage{pgfplots}' ]
+    res += [ '\\usepgfplotslibrary{groupplots}' ]
     res += [ '\\begin{document}' ]
     res += [ _m( 'TIKZPICTURE' ) ]
-    res += [ '\end{document}' ]
+    res += [ '\\end{document}' ]
     text = '\n'.join( res )
 
     pictureText = toPGFPlot( x, y, **kwargs )
