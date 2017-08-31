@@ -56,9 +56,12 @@ def to_axis( x, y, **kwargs ):
         res += [ '  \\addplot [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
     else:
         res += [ '  \\addplot+ [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
-
-    res.append( _m( 'DATA' ) )
     res += [ '  };' ]
+    res.append( _m( 'DATA' ) )
+
+    # Close axis.
+    res += [ '\end{axis}' ]
+
     text = '\n'.join( res )
 
     # Add these default axis attributes.
@@ -111,7 +114,7 @@ def toPGFPlot( x, y, **kwargs ):
     text = _sub( 'AXIS', axisText, text )
     return text 
 
-def standalone( x, y, outfile = None, **kwargs ):
+def standalone( x, y, outfile = '', **kwargs ):
     res = [ '\RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
 
@@ -128,6 +131,7 @@ def standalone( x, y, outfile = None, **kwargs ):
 
     # Write to file or print to stdout.
     if outfile:
+        print( 'Writing to %s' % outfile )
         with open( outfile, 'w' ) as f:
             f.write( text ) 
     else:

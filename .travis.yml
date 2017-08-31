@@ -1,0 +1,12 @@
+language: python
+python:
+- '2.7'
+- '3.3'
+
+before_script:
+    - sudo apt install texlive-lualatex 
+    - sudo apt install python-numpy python-matplotlib 
+
+script :
+    - python ./test.py
+    - find . -type f -name "*.tex" -print0 | xargs -I file lualatex --shell-escape file
