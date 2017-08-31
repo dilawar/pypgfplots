@@ -1,4 +1,4 @@
-all : build test install
+all : build test 
 	@echo "All done"
 
 build :

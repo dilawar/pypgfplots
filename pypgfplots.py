@@ -56,37 +56,27 @@ def add_axis_attribs( text, axis_props_text ):
 def add_plot_attribs( text, plot_props_text ):
     return _sub( 'plot_attribs', plot_props_text, text )
 
-def to_axis( x, y, **kwargs ):
-    # Initialize axis and plot.
-    res = [ '\\begin{axis}[ %s ]' % _m( 'axis_attribs' ) ]
+def addPlot( x, y, legend = '', **kwargs ):
+    """ Add an axis to picture """
 
+    res = [ ]
     if kwargs.get( 'vergin_axis', False ):
-        res += [ '  \\addplot [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
+        res += [ '\\addplot [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
     else:
-        res += [ '  \\addplot+ [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
+        res += [ '\\addplot+ [ ' + _m( 'plot_attribs' ) + '] coordinates { ' ]
     res += [ _m( 'DATA' ) ]
     res += [ '  };' ]
 
-    # Close axis.
-    res += [ '\end{axis}' ]
-
+    # Add legend entry.
+    if legend:
+        res += [ '\\addlegendentry{ %s };' % legend ]
     text = '\n'.join( res )
-
-    # Add these default axis attributes.
-    defaultAxisAttribs = [ ]
-    defaultAxisAttribsText = get_default_attribs( 
-            [ 'xlabel=', 'ylabel=', 'title=' ], **kwargs 
-            ) 
 
     # These are default plot attributesi.
     defaultPlotAttribs = [ ]
     defaultPlotAttribsText = ', '.join( defaultPlotAttribs )
-    # And finally replace placeholders keeping axis and plot attributes.
-    text = add_axis_attribs( text
-            , defaultAxisAttribsText + kwargs.get( 'axis_attribs', '' ) )
     text = add_plot_attribs( text
             , defaultPlotAttribsText + kwargs.get( 'plot_attribs', '' ) )
-
 
     # Now attach data.
     data = [ ]
@@ -99,10 +89,38 @@ def to_axis( x, y, **kwargs ):
 
     return text
 
-def toPGFPlot( x, y, **kwargs ):
-    '''Generate a tikzpicture environment'''
+def addAxis( x, ys, **kwargs ):
+    axis = [ '\\begin{axis}[ ' + _m( 'axis_attribs' ) + ' ] ' ]
+    # Attach axis.
+    legends = kwargs.get( 'legends', '' )
+    if not isinstance( legends, list ):
+        legends = legends.split( ',' )
+    series = [ ]
+    for i, y in enumerate( ys ):
+        l = ''
+        if len( legends ) > i:
+            l = legends[ i ]
+        axis.append( indent( addPlot( x, y, legend = l, **kwargs ), '  ' ) )
+    axis += [ '\\end{axis}' ]
+    axisText = '\n'.join( axis )
+    # Add these default axis attributes.
+    defaultAxisAttribs = [ ]
+    defaultAxisAttribsText = get_default_attribs( 
+            [ 'xlabel=', 'ylabel=', 'title=' ], **kwargs 
+            ) 
+    axisText = _sub( 'axis_attribs', defaultAxisAttribsText, axisText )
+    return axisText
+
+
+def toPGFPlot( xs, ys, **kwargs ):
+    """toPGFPlot Convert given x, ys to  a tikzpicture.
+
+    :param x: value on x-axis. 
+    :param ys: single or multiple y-axis values.
+    :param **kwargs:
+    """
     res = [ '\\begin{tikzpicture}[ %s ] ' % _m( 'tikzpicture_attribs' ) ]
-    res += [ _m( 'AXIS' ) ]
+    res += [ _m( 'AXISES' ) ]
     res += [ '\end{tikzpicture}' ]
     text = '\n'.join( res )
 
@@ -116,16 +134,21 @@ def toPGFPlot( x, y, **kwargs ):
             , defaultPictureAttribsText + ', ' + pictureAttribsText
             , text )
 
+    if not isinstance( xs, list ):
+        xs, ys = [ xs ], [ ys ]
+    
+    axises = [ ]
+    for i, x in enumerate( xs ):
 
-    # Attach axis.
-    axisText = indent( to_axis( x, y, **kwargs ), '  ' )
-    text = _sub( 'AXIS', axisText, text )
+        axisText = addAxis( x, ys[i], **kwargs )
+        axises.append( axisText )
+
+    text = _sub( 'AXISES', '\n'.join( axises ), text )
     return text 
 
 def standalone( x, y, outfile = '', **kwargs ):
     res = [ '% \RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
-
     res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
     res += [ '\\usepackage{pgfplots}' ]
     res += [ '\\usepgfplotslibrary{groupplots}' ]
@@ -133,7 +156,6 @@ def standalone( x, y, outfile = '', **kwargs ):
     res += [ _m( 'TIKZPICTURE' ) ]
     res += [ '\\end{document}' ]
     text = '\n'.join( res )
-
     pictureText = toPGFPlot( x, y, **kwargs )
     text = _sub( 'TIKZPICTURE', pictureText, text )
 
