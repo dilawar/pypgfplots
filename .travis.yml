@@ -4,7 +4,7 @@ python:
 - '3.3'
 
 before_script:
-    - sudo apt install texlive-luatex  texlive-pictures
+    - sudo apt install texlive-luatex  texlive-pictures texlive-latex-extra
     - sudo apt install python-numpy python-matplotlib 
 
 script :
