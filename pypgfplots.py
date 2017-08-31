@@ -38,10 +38,13 @@ def get_default_attribs( listofkeyval, **kwargs ):
     if not isinstance( listofkeyval, list ):
         listofkeyval = listofkeyval.split( ';' )
     for a in listofkeyval:
-        key, val = a.split( '=' )
-        if kwargs.get( key, '' ):
-            val = kwargs[ key ]
-        default.append( b'%s=%s' % (key, clean(val) ) )
+        if '=' in a:
+            key, val = a.split( '=', 1 )
+            if kwargs.get( key, '' ):
+                val = kwargs[ key ]
+            default.append( b'%s=%s' % (key, clean(val) ) )
+        else:
+            default.append( clean( a ) )
     return ', '.join( default )
 
 def indent( text, prefix = '  ' ):
@@ -49,12 +52,6 @@ def indent( text, prefix = '  ' ):
     for l in text.split( '\n' ):
         newLines.append( prefix + l )
     return '\n'.join( newLines )
-
-def add_axis_attribs( text, axis_props_text ):
-    return _sub( 'axis_attribs', axis_props_text, text )
-
-def add_plot_attribs( text, plot_props_text ):
-    return _sub( 'plot_attribs', plot_props_text, text )
 
 def addPlot( x, y, legend = '', **kwargs ):
     """ Add an axis to picture """
@@ -75,12 +72,17 @@ def addPlot( x, y, legend = '', **kwargs ):
     # These are default plot attributesi.
     defaultPlotAttribs = [ ]
     defaultPlotAttribsText = ', '.join( defaultPlotAttribs )
-    text = add_plot_attribs( text
-            , defaultPlotAttribsText + kwargs.get( 'plot_attribs', '' ) )
+    text = _sub( 'plot_attribs'
+            , defaultPlotAttribsText + kwargs.get( 'plot_attribs', '' ) 
+            , text )
 
     # Now attach data.
     data = [ ]
     every = int( kwargs.get( 'every', 1 ))
+
+    # If x is empty or None, use index.
+    if x is None or len(x) < 1:
+        x = np.arange( 0, len( y ), 1 )
     for a, b in zip( x[::every], y[::every] ):
         data.append( ' ( %g, %g )' % (a, b ) )
 
@@ -105,9 +107,10 @@ def addAxis( x, ys, **kwargs ):
     axisText = '\n'.join( axis )
     # Add these default axis attributes.
     defaultAxisAttribs = [ ]
-    defaultAxisAttribsText = get_default_attribs( 
-            [ 'xlabel=', 'ylabel=', 'title=' ], **kwargs 
-            ) 
+    attribs = [ 
+            'xlabel=', 'ylabel=', 'title=', 'legend style={draw=none,font=\footnotesize}' 
+            ] 
+    defaultAxisAttribsText = get_default_attribs(  attribs, **kwargs ) 
     axisText = _sub( 'axis_attribs', defaultAxisAttribsText, axisText )
     return axisText
 
@@ -121,6 +124,11 @@ def toPGFPlot( xs, ys, **kwargs ):
     """
     res = [ '\\begin{tikzpicture}[ %s ] ' % _m( 'tikzpicture_attribs' ) ]
     res += [ _m( 'AXISES' ) ]
+    
+    # if label is given, then attach a special node.
+    label = kwargs.get( 'label', '' )
+    if label:
+        res += [ '\\node[fill=none] at (rel axis cs:-0.1,1.2) {%s};' % label ]
     res += [ '\end{tikzpicture}' ]
     text = '\n'.join( res )
 
@@ -157,6 +165,7 @@ def standalone( x, y, outfile = '', **kwargs ):
     res += [ '\\end{document}' ]
     text = '\n'.join( res )
     pictureText = toPGFPlot( x, y, **kwargs )
+
     text = _sub( 'TIKZPICTURE', pictureText, text )
 
     # Write to file or print to stdout.
