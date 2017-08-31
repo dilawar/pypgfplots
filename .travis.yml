@@ -6,8 +6,7 @@ python:
 before_script:
     - sudo apt install texlive-luatex  texlive-pictures
     - sudo apt install python-numpy python-matplotlib 
-    - sudo tlmgr install luatex85 shellesc
 
 script :
     - python ./test.py
-    - find . -type f -name "*.tex" -print0 | xargs -I file lualatex --shell-escape file
+    - find . -type f -name "*.tex" -print0 | xargs -I file pdflatex --shell-escape file

@@ -115,7 +115,7 @@ def toPGFPlot( x, y, **kwargs ):
     return text 
 
 def standalone( x, y, outfile = '', **kwargs ):
-    res = [ '\RequirePackage{luatex85,shellesc}' ]
+    res = [ '% \RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
 
     res += [ '\documentclass[tikz,preview,multi=false]{standalone}' ]
