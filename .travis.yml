@@ -5,7 +5,7 @@ python:
 
 before_script:
     - sudo apt install texlive-luatex  texlive-pictures texlive-latex-extra
-    - sudo apt install python-numpy python-matplotlib 
+    - sudo apt install python-numpy python3-numpy 
 
 script :
     - make build
