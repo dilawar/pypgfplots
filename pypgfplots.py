@@ -154,7 +154,7 @@ def toPGFPlot( xs, ys, **kwargs ):
     text = _sub( 'AXISES', '\n'.join( axises ), text )
     return text 
 
-def write_standalone( x, y, outfile = '', **kwargs ):
+def standalone_template( **kwargs ):
     res = [ '% \RequirePackage{luatex85,shellesc}' ]
     defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
     res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
@@ -163,8 +163,10 @@ def write_standalone( x, y, outfile = '', **kwargs ):
     res += [ '\\begin{document}' ]
     res += [ _m( 'TIKZPICTURE' ) ]
     res += [ '\\end{document}' ]
-    text = '\n'.join( res )
+    return '\n'.join( res )
 
+def write_standalone( x, y, outfile = '', **kwargs ):
+    text = standalone_template( **kwargs )
     # For each x there could be multiple of ys.
     if not isinstance( y, list ):
         y = [ y ]
@@ -178,6 +180,21 @@ def write_standalone( x, y, outfile = '', **kwargs ):
             f.write( text ) 
     else:
         print( text )
+
+def toPGFPlot3( x, y, z, **kwargs ):
+    return ""
+
+def write_standalone_matrix( mat, outfile = '', **kwargs ):
+    """write_standalone_matrix Given a 2d matrix, generate a pgfplot file.
+    Matrix is a special case of 3d surf plot.
+
+    :param mat:
+    :param outfile:
+    :param **kwargs:
+    """
+    template = standalone_template( **kwargs )
+    print( template )
+
 
 if __name__ == '__main__':
     main()

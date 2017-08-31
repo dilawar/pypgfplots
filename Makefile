@@ -1,4 +1,5 @@
-all : build test 
+
+all : build
 	@echo "All done"
 
 build :
@@ -8,7 +9,15 @@ build :
 install :
 	python setup.py install --user
 
-test : ./test.py ./pypgfplots.py
-	python3 $<
-	find . -type f -name '*.tex' | xargs -I file pdflatex --shell-escape file
-	find . -type f -name '*.pdf' | xargs -I file convert file file.png
+test : ./pypgfplots.py $(PDFS)
+	( cd tests && $(MAKE) )
+	@echo "All tests are done"
+
+%.py.tex : %.py
+	PYTHONPATH=. python $<
+
+%.pdf : %.tex
+	pdflatex $<
+
+%.png : %.pdf 
+	convert $< $@

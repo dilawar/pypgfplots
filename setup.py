@@ -21,7 +21,7 @@ setup(
     version = "0.0.1",
     description = "Create simple tikz figure (pgfplots) from python-numpy arrays.",
     long_description = readme,
-    packages = [ '' ],
+    packages = [ '', 'tests' ],
     package_data = {},
     install_requires = [ ],
     author = "Dilawar Singh",
