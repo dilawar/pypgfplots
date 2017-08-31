@@ -12,6 +12,7 @@ __status__           = "Development"
 import sys
 import os
 import numpy as np
+import re
 
 delimiter_ = '@@'
 def _m( name ):
@@ -21,6 +22,13 @@ def _m( name ):
 
 def _sub( name, value, text ):
     return text.replace(  _m( name ), value )
+
+def clean( s ):
+    s = s.replace( "\t", "\\t" )
+    s = s.replace( "\f", "\\f" )
+    s = s.replace( "\b", "\\b" )
+    s = s.replace( "\n", "\\n" )
+    return s
 
 def get_default_attribs( listofkeyval, **kwargs ):
     ''' listofkeyval: list 'key=val' or a ;-separated string e.g
@@ -33,7 +41,7 @@ def get_default_attribs( listofkeyval, **kwargs ):
         key, val = a.split( '=' )
         if kwargs.get( key, '' ):
             val = kwargs[ key ]
-        default.append( '%s=%s' % (key, val) )
+        default.append( b'%s=%s' % (key, clean(val) ) )
     return ', '.join( default )
 
 def indent( text, prefix = '  ' ):
