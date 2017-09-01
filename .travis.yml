@@ -12,7 +12,7 @@ before_install:
     - sudo apt-get update -q
 
 before_script:
-    - sudo apt install texlive-pictures texlive-luatex -y
+    - sudo apt install texlive-base texlive-latex-base  -y
     - # sudo ./_travis/install-tl-ubuntu -g # This takes 36 mins on travis. Not worth it.
     - sudo tlmgr install pgfplots 
     - sudo apt install python-numpy python3-numpy -y
