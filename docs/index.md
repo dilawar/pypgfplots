@@ -1,5 +1,5 @@
 # Examples
-## test_2dplota.py
+## [test_2dplota.py]({{ site.url }} /tests/test_2dplota.py)
 
 
 ```python
@@ -23,7 +23,7 @@ pypgfplots.write_standalone( None, (y1, y2), '%s.tex' % sys.argv[0]
 ```
 
 ![test_2dplota.py](test_2dplota.py.png)
-## test_imshow.py
+## [test_imshow.py]({{ site.url }} /tests/test_imshow.py)
 
 
 ```python
