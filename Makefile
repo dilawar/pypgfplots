@@ -1,5 +1,5 @@
 
-all : build
+all : build docs
 	@echo "All done"
 
 build :
@@ -25,3 +25,6 @@ png : ./pypgfplots.py
 
 %.png : %.pdf 
 	convert $< $@
+
+docs :
+	cd docs && $(MAKE)
