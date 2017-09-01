@@ -7,6 +7,7 @@ python:
 before_install:
     - sudo add-apt-repository ppa:jonathonf/texlive-2016 -y
     - sudo apt-get update -q
+    - sudo apt-get upgrade
 
 before_script:
     - sudo apt install texlive-full -y
