@@ -4,6 +4,9 @@ python:
 - '2.7'
 - '3.3'
 
+cache:
+    apt: true
+
 before_install:
     - sudo add-apt-repository ppa:jonathonf/texlive-2016 -y
     - sudo apt-get update -q
