@@ -13,6 +13,7 @@ before_install:
 
 before_script:
     - sudo apt install texlive-full -y
+    - # sudo ./_travis/install-tl-ubuntu -g # This takes 36 mins on travis. Not worth it.
     - sudo apt install python-numpy python3-numpy -y
     - sudo apt install imagemagick -y
 
