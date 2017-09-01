@@ -11,6 +11,7 @@ test : $(PDFS)
 
 png : $(PNGS)
 	echo "Generated PNGs"
+	rsync -azv *.png ../docs
 
 %.py.tex : %.py
 	PYTHONPATH=.. python $<
