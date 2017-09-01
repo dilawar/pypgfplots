@@ -8,11 +8,12 @@ cache:
     apt: true
 
 before_install:
-    - sudo add-apt-repository ppa:jonathonf/texlive-2016 -y
-    - sudo apt-get update -q
+    - # sudo add-apt-repository ppa:jonathonf/texlive-2016 -y
+    - # sudo apt-get update -q
 
 before_script:
-    - sudo apt install texlive-full -y
+    - # sudo apt install texlive-full -y
+    - sudo ./_travis/install-tl-ubuntu -g
     - sudo apt install python-numpy python3-numpy -y
     - sudo apt install imagemagick -y
 
