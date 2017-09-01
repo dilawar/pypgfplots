@@ -4,11 +4,11 @@ python:
 - '3.3'
 
 before_install:
-    - sudo add-apt-repository ppa:jonathonf/texlive-2017 -y
+    - sudo add-apt-repository ppa:jonathonf/texlive -y
     - sudo apt-get update -q
 
 before_script:
-    - sudo apt install texlive-luatex  texlive-pictures texlive-latex-extra -y
+    - sudo apt install texlive-full -y
     - sudo apt install python-numpy python3-numpy -y
     - sudo apt install imagemagick -y
 
