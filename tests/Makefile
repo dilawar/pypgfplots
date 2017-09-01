@@ -3,10 +3,9 @@ TEXS:=$(TESTSCRIPTS:.py=.py.tex)
 PDFS:=$(TEXS:.tex=.pdf)
 PNGS:=$(PDFS:.pdf=.png)
 
-all : test
+all : test png
 
-
-test : $(PDFS)
+test : $(PDFS) ../pypgfplots.py
 	echo "Generated all pdf"
 
 png : $(PNGS)
