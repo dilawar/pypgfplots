@@ -2,7 +2,7 @@
 ## test_2dplota.py
 
 
-```{python}
+```python
 import sys
 sys.path += [ '.', '..' ]
 import pypgfplots 
@@ -26,7 +26,7 @@ pypgfplots.write_standalone( None, (y1, y2), '%s.tex' % sys.argv[0]
 ## test_imshow.py
 
 
-```{python}
+```python
 import sys
 sys.path += [ '.', '..' ]
 import pypgfplots

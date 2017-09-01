@@ -1,3 +1,4 @@
+TEST_SCRIPTS:=$(wildcard ./tests/*.py)
 
 all : build docs
 	@echo "All done"
@@ -26,5 +27,5 @@ png : ./pypgfplots.py
 %.png : %.pdf 
 	convert $< $@
 
-docs :
+docs : $(TEST_SCRIPTS)
 	cd docs && $(MAKE)
