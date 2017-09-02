@@ -35,13 +35,13 @@ text.append( "<table>" )
 for f, ftext in zip( files, pytext ):
     fname = os.path.basename( f )
     imgname = fname + '.png'
-    url = '{{ site.url }} /tests/%s' % fname 
+    url = '{{ site.url }}/blob/master/docs/%s' % fname 
     text.append( '<tr>' )
     text.append( '</td><td>' )
     code = pygments.highlight( ftext, lexer, formatter )
     text.append( '<div class="highlight">%s </div>' % code )
     text.append( '</td><td>' )
-    text.append( '<img src="%s" width="500px">' % imgname )
+    text.append( '<img src="docs/%s" width="500px">' % imgname )
     text.append( '</td>' )
     text.append( '</tr>' )
 
