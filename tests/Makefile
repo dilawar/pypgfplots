@@ -16,7 +16,7 @@ png : $(PNGS)
 	PYTHONPATH=$(shell pwd)/.. python $<
 
 %.pdf : %.tex
-	pdflatex $<
+	pdflatex -interaction nonstopmode $<
 
 %.png : %.pdf 
 	convert -density 300 -quality 90 $< $@
