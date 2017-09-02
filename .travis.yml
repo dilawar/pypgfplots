@@ -15,7 +15,7 @@ before_script:
     - sudo apt install texlive-base texlive-latex-base xzdec  -y
     - # sudo ./_travis/install-tl-ubuntu -g # This takes 36 mins on travis. Not worth it.
     - sudo tlmgr init-usertree
-    - sudo tlmgr install pgfplots standalone pgf 
+    - sudo tlmgr install pgfplots standalone pgf  xkeyval siunitx chemfig
     - sudo apt install python-numpy python3-numpy -y
     - sudo apt install imagemagick -y
 
