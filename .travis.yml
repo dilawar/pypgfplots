@@ -17,7 +17,7 @@ before_script:
     - sudo tlmgr init-usertree
     - sudo tlmgr install pgfplots standalone pgf  xkeyval siunitx  ms xcolor preview
     - sudo apt install python-numpy python3-numpy -y
-    - sudo apt install imagemagick -y
+    - sudo apt install imagemagick ghostscript -y
 
 script :
     - make build
