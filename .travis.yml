@@ -12,7 +12,7 @@ before_install:
     - sudo apt-get update -q
 
 before_script:
-    - sudo apt install texlive-base texlive-latex-base  -y
+    - sudo apt install texlive-base texlive-latex-base xzdec  -y
     - # sudo ./_travis/install-tl-ubuntu -g # This takes 36 mins on travis. Not worth it.
     - sudo tlmgr init-usertree
     - sudo tlmgr install pgfplots 
