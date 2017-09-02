@@ -15,15 +15,23 @@ for f in files:
         pytext.append( _f.read( ) ) 
 
 text =  [ '# Examples' ]
+text.append( "<table>" )
+
 for f, ftext in zip( files, pytext ):
     fname = os.path.basename( f )
     imgname = fname + '.png'
     url = '{{ site.url }} /tests/%s' % fname 
     text.append( '## [%s](%s)\n\n' % (fname, url) )
+    text.append( '<tr><td>\n' )
     text.append( '```python\n%s \n```' % ftext )
+    text.append( '</td><td>' )
     text.append( '\n![%s](%s)' % (fname, imgname ) )
+    text.append( '</td></tr>' )
+
+text += [ "</table>" ]
 
 txt = '\n'.join( text )
 with open( docFile, 'w' ) as f:
+    print( txt )
     f.write( txt )
 
