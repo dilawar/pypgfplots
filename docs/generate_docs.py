@@ -35,7 +35,7 @@ text.append( "<table>" )
 for f, ftext in zip( files, pytext ):
     fname = os.path.basename( f )
     imgname = fname + '.png'
-    url = 'https://github.com/dilawar/pypgfplots/blob/master/docs/%s' % fname 
+    url = 'https://github.com/dilawar/pypgfplots/blob/master/docs/%s' % imgname 
     text.append( '<tr>' )
     text.append( '</td><td>' )
     code = pygments.highlight( ftext, lexer, formatter )
