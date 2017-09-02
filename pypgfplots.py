@@ -13,246 +13,251 @@ import sys
 import os
 import numpy as np
 import re
+import xml.etree.ElementTree as ET
+import pgfxml
+import latex
+import helper
 
-delimiter_ = '@@'
-def _m( name ):
-    '''Generate macros '''
-    global delimiter_
-    return '%s%s%s' % (delimiter_, name, delimiter_ )
-
-def _sub( name, value, text ):
-    return text.replace(  _m( name ), value )
-
-def clean( s ):
-    s = s.replace( "\t", "\\t" )
-    s = s.replace( "\f", "\\f" )
-    s = s.replace( "\b", "\\b" )
-    s = s.replace( "\n", "\\n" )
-    return s
-
-def get_default_attribs( listofkeyval, **kwargs ):
-    ''' listofkeyval: list 'key=val' or a ;-separated string e.g
-    'key1=val1;key2=val2''
-    '''
-    default = [ ]
-    if not isinstance( listofkeyval, list ):
-        listofkeyval = listofkeyval.split( ';' )
-    for a in listofkeyval:
-        if '=' in a:
-            key, val = a.split( '=', 1 )
-            if kwargs.get( key, '' ):
-                val = '%s' % kwargs[ key ]
-            default.append( '%s=%s' % (key, clean(val) ) )
-        else:
-            default.append( clean( a ) )
-    return ', '.join( default )
-
-def indent( text, prefix = '  ' ):
-    newLines = [ ]
-    for l in text.split( '\n' ):
-        newLines.append( prefix + l )
-    return '\n'.join( newLines )
-
-def addData( x, y, z=[], **kwargs ):
-    data = [ ]
+def dataToTableText( data_dict, **kwargs ):
     every = int( kwargs.get( 'every', 1 ))
-
-    # If x is empty or None, use index.
-    if x is None or len(x) < 1:
-        x = np.arange( 0, len( y ), 1 )
-
-    if len(z) > 0:
+    header, cols = [ ], [ ]
+    for k in data_dict.keys( ): 
         # Matrix plot, insert a new line every time row index change.
-        coords = [ 'x y meta' ]
-        for a, b, c in zip( x[::every], y[::every], z[::every] ):
-            coords.append('%s %s %s' % (a, b, c) )
-        data.append( '\n'.join(coords) )
-    else:
-        coords = [ 'x y' ]
-        for a, b in zip( x[::every], y[::every] ):
-            coords.append( '%g %g' % (a, b ) )
-        data.append( '\n'.join( coords ) )
+        s = data_dict[ k ][::every]
+        if len(s) > 0:
+            cols.append( s )
+            header.append( k )
 
-    dataTxt = indent( '\n'.join( data ), ' '*4 )
+    header = ' '.join( header )
+    data = np.vstack( cols ).T
+    coords = [ header ]
+    for s in data:
+        s = map( lambda x: '%g' % x, s )
+        coords.append( ' '.join( s ) )
+    dataTxt = '\n'.join( coords )
     return dataTxt 
 
-
-def addPlot( x, y, z = [], legend = '', **kwargs ):
-    """ Add an axis to picture """
-
-    res = [ ]
-    if kwargs.get( 'virgin_axis', False ):
-        res += [ '\\addplot [ ' + _m( 'plot_attribs' ) + '] table { ' ]
-    else:
-        res += [ '\\addplot+ [ ' + _m( 'plot_attribs' ) + '] table { ' ]
-    res += [ _m( 'TABLEDATA' ) ]
-    res += [ '  };' ]
-
-    # Add legend entry.
-    if legend:
-        res += [ '\\addlegendentry{ %s };' % legend ]
-    text = '\n'.join( res )
-
-    # These are default plot attributes.
+def generate_ticks( ticktype, ticks ):
     attribs = [ ]
-    # if z values are given then we are plotting a matrix plot.
+    tickLocation, tickLabels = zip( *ticks )
+    tickLocation = map( lambda x: '%s' % x, tickLocation )
+    return tickLocation, tickLabels
 
-    if z:
-        nrows = int(max( x )) + 1
-        attribs += [ 'mesh/rows=%d' % nrows, 'matrix plot'
-                , 'point meta=\\thisrow{meta}', 'colormap name=hot' ]
+def attachTicks( axis, **kwargs ):
+    for tick in [ 'xtick', 'ytick', 'ztick' ]:
+        if kwargs.get( tick, [ ] ):
+            loc, label = generate_ticks( tick, kwargs[ tick ] )
+            axis.attrib[ tick ] = '{ %s }' % ','.join( loc )
+            axis.attrib['%slabels' % tick ] = '{%s}' % ','.join( label )
 
-    attribsText = get_default_attribs( attribs, **kwargs )
-    text = _sub( 'plot_attribs', attribsText + kwargs.get( 'plot_attribs', '' ) , text )
+def attachData( table, data_dict, **kwargs ):
+    dataText = dataToTableText( data_dict, **kwargs )
+    table.text = '{\n' + dataText + '\n};\n'
 
-    # Now attach data.
-    text = _sub( 'TABLEDATA', addData(x, y, z, **kwargs), text )
-    return text
+def attachTexLabel( plot, id_ ):
+    # add a pgfplot label using \label. It can be use by \ref. This is hardly
+    # ever used in my own work.
+    assert id_ > -1, 'got %s' % id_
+    label = 'pgfplots:label%d' % id_
+    le = ET.Element( 'label' )
+    le.text = '{'+  label + '}'
+    plot.append( le )
+    return le
 
-def axis_template( **kwargs ):
-    axis = [ '\\begin{axis}[ ' + _m( 'axis_attribs' ) + ' ] ' ]
-    axis += [ _m( "AXIS" ) ]
-    axis += [ "\\end{axis}\n" ]
-    axisText = '\n'.join( axis )
+def plotAttr( **kwargs ):
+    cl = kwargs.get( 'color', '' )
+    attr = { }
+    if cl:
+        attr[ 'color' ] = cl
+        attr[ 'mark options' ] = '{fill=%s}' % cl
+    return attr
 
-    # Add these default axis attributes.
-    defaultAxisAttribs = [ ]
-    attribs = [ 'xlabel=', 'ylabel=', 'title='
-            , 'legend style={draw=none,font=\footnotesize}' 
-            , 'width=5cm', 'height=4cm'
-            ] 
-    defaultAxisAttribsText = get_default_attribs(  attribs, **kwargs ) 
-    axisAttr = defaultAxisAttribsText + ',' + kwargs.get( 'axis_attribs', '' )
-    axisText = _sub( 'axis_attribs', axisAttr , axisText )
-    return axisText
+def addPlotXML( x, y, z=[], id_=0, **kwargs ):
+    """Add plot to axis.
 
-def addAxis( x, ys, **kwargs ):
-    """addAxis An axis can have multiple y-series.
-    :param x:
-    :param ys:
-    :param zs:
+    :param axis: xml element.
+    :param x: x-vector.
+    :param y: y-vector.
     :param **kwargs:
     """
-    template = axis_template( **kwargs )
-    legends = kwargs.get( 'legends', '' )
-    if not isinstance( legends, list ):
-        legends = legends.split( ',' )
-    series = [ ]
-    for i, y in enumerate( ys ):
-        l = ''
-        if len( legends ) > i:
-            l = legends[ i ]
-        series.append( indent( addPlot( x, y, legend = l, **kwargs ), '  ' ) )
-    template = _sub( 'AXIS', '\n'.join( series ), template )
-    return template
-
-def addAxisMatrix( x, ys, zs, **kwargs ):
-    kwargs[ 'axis_attribs' ] = kwargs.get( 'axis_attribs', '' ) + ',colorbar'
-    template = axis_template( enlargelimits = 'false', **kwargs )
-    legends = kwargs.get( 'legends', '' )
-    if not isinstance( legends, list ):
-        legends = legends.split( ',' )
-    series = [ ]
-    series.append( indent( addPlot( x, ys, zs, legend = '', **kwargs ), '  ' ) )
-    template = _sub( 'AXIS', '\n'.join( series ), template )
-    return template
-
-def tikzpicture_template( **kwargs ):
-    res = [ '\\begin{tikzpicture}[ %s ] ' % _m( 'tikzpicture_attribs' ) ]
-    res += [ _m( 'AXISES' ) ]
+    attr = plotAttr( **kwargs )
+    plot = ET.Element( 'addplot+', **attr )
+    tableElem = ET.Element( 'table', x='x', y='y', z='z' )
+    attachData( tableElem, dict( x=x, y=y, z=z), **kwargs )
+    plot.append( tableElem )
     
-    # if label is given, then attach a special node.
-    label = kwargs.get( 'label', '' )
+    # Attach a label; hardly ever used in my work.
+    attachTexLabel( plot, id_ )
 
-    # Label is (-1cm, 1cm) shifted from rel axis cs:0,1.
-    if label:
-        res += [ '\\node[align=left] at ([xshift=-1cm,yshift=1cm]rel axis cs:0,1) {%s};' % label ]
-    res += [ '\end{tikzpicture}' ]
-    text = '\n'.join( res )
+    return plot
 
-    # Default tikzpicture attribs.
-    defaultPictureAttribsText = get_default_attribs( 
-         [ 'scale=1', 'xshift=0', 'yshift=0' ], **kwargs 
-         )
-    pictureAttribsText = kwargs.get( 'tikzpicture_attribs', '' )
-    text = _sub( 'tikzpicture_attribs'
-            , defaultPictureAttribsText + ', ' + pictureAttribsText
-            , text )
+def addImshowXML( mat, **kwargs ):
+    nrows = mat.shape[0]
+    attr = plotAttr( **kwargs )
+    attr[ 'matrix plot*'] = ''
+    attr[ 'mesh/rows' ] = nrows
+    image = ET.Element( 'addplot', **attr )
 
-    return text
+    tabAttrib = dict( x='x', y='y', meta = 'meta', point_meta='explicit' )
+    tableElem = ET.Element( 'table', **tabAttrib )
+
+    x, y, z = [], [], []
+    for (i, j), v in np.ndenumerate( mat ):
+        x.append( i )
+        y.append( j )
+        z.append( v )
+
+    attachData( tableElem, dict(x=x, y=y, meta=z), **kwargs )
+    image.append( tableElem )
+
+    return image
+
+def getDefaultAxis( **kwargs ):
+    default = helper.keyvalToDict( [ 'xlabel=', 'ylabel=', 'title='
+        , 'legend style={draw=none,fill=none,font=\footnotesize}'  
+        , 'axis y line=box'
+        ]  )
+
+    # Also add the user specified attributes.
+    default = helper.keyvalToDict( kwargs.get( 'axis_attrib', '' ), default )
+
+    # Overwrite any default by global kwargs.
+    for k in default:
+        if kwargs.get( k ):
+            default[k] = helper.clean( kwargs[k] )
+
+    axis = ET.Element( 'axis', **default )
+    return axis
+
+def attachLegends( pic, legends, **kwargs ):
+    axises = pic.findall( 'axis' )
+    lastAxis = axises[-1]
+    # collect the labels from other axies.
+    plotLabels = [ ]
+    for i, axis in enumerate( axises ):
+        # Append addlegendentry 
+        for p in axis.findall( 'addplot+' ):
+            l = p.find( 'label' )
+            if l is not None:
+                l = helper.remove_chars( l.text, '{}' )
+                plotLabels.append( l )
+
+    for i, pl in enumerate( plotLabels ):
+        l = ''
+        if len(legends) > i:
+            l = legends[i]
+
+        legend = 'addlegendentry{%s}' % l
+        tag = 'addlegendimage{/pgfplots/refstyle=%s}\\%s' % (pl, legend )
+        e = ET.Element( tag )
+        lastAxis.append( e )
+
+def tikz_addplot( pic, data, **kwargs ):
+    ylabel = kwargs.get( 'ylabel', '' )
+    color = kwargs.get( 'color', '' )
+    axis, numPlots = None, 0
+    for xys in data:
+        if len( xys ) == 2:
+            kwargs[ 'axis y line'] = 'left' if numPlots % 2 == 0 else 'right'
+            # Here ylabel can be a list.
+            if helper.is_sequence( ylabel ):
+                kwargs[ 'ylabel' ] = ylabel[ numPlots ]
+            else:
+                kwargs[ 'ylabel' ] = ylabel
+
+            # Similarly color.
+            if helper.is_sequence( color ):
+                kwargs[ 'color'] = color[numPlots]
+            else:
+                kwargs[ 'color' ] = color
+
+            axis = getDefaultAxis( **kwargs )
+            plot = addPlotXML(  xys[0], xys[1], id_=numPlots, **kwargs )
+            axis.append( plot )
+            numPlots += 1
+
+            attachTicks( axis, **kwargs )
+            pic.append( axis )
+
+        elif len( xys ) > 2:
+            # This plot is of format (x, y1, y2 .. ); all plots are to be drawn
+            # on same y-axis.
+            axis = getDefaultAxis( **kwargs )
+            x = xys[ 0 ]
+            for i, y in enumerate( xys[1:] ):
+                plot = addPlotXML( x, y, id_=numPlots,  **kwargs )
+                axis.append( plot )
+                numPlots += 1
+
+            attachTicks( axis, **kwargs )
+            # Append axis at the end.
+            pic.append( axis )
+        else:
+            raise UserWarning( 'Invalid data' )
+    return axis
 
 
-def tikzpicture( x, ys, **kwargs ):
-    """tikzpicture. Convert given x, ys to  a tikzpicture.
+def tikz_imshow( pic, mat, **kwargs ):
+    nrows, ncols = mat.shape 
+    assert ncols > 1, 'Must have more than 1 cols'
+    assert nrows > 1, 'Must have more than 1 rows'
+    axis = getDefaultAxis( **kwargs )
+    axis.attrib[ 'colorbar' ] = ''
+    axis.attrib[ 'colormap name' ] = 'viridis'
+    plot = addImshowXML( mat, **kwargs )
+    axis.append( plot )
+    attachTicks( axis, **kwargs )
+    pic.append( axis )
+    return axis
 
-    :param x: value on x-axis. 
-    :param ys: single or multiple y-axis values.
-    :param **kwargs:
-    """
-    text = tikzpicture_template( **kwargs )
-    axisText = addAxis( x, ys, **kwargs )
-    text = _sub( 'AXISES', axisText, text )
-    return text 
 
-def tikzpicture_matrix( x, y, z, **kwargs ):
-    text = tikzpicture_template( **kwargs )
-    axisText = addAxisMatrix( x, y, z, **kwargs )
-    text = _sub( 'AXISES', axisText, text )
-    return text 
+def tikzpicture( data, **kwargs ):
+    doc = pgfxml.PGFPlot( )
 
-def tikzpicture3d( x, y, z, **kwargs ):
-    return 'Not supported yet.'
+    # Geneate plots.
+    pic = doc.root
+    axis = None
 
-def standalone_template( **kwargs ):
-    res = [ '% \RequirePackage{luatex85,shellesc}' ]
-    defaultStandaloneAttribText = get_default_attribs( [ 'multi=false' ], **kwargs )
-    res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
-    res += [ '\\usepackage{pgfplots}' ]
-    res += [ '\\usepgfplotslibrary{groupplots}' ]
-    res += [ '\\begin{document}' ]
-    res += [ _m( 'TIKZPICTURE' ) ]
-    res += [ '\\end{document}' ]
-    return '\n'.join( res )
-
-def matrixPlot( mat, **kwargs ):
-    xs, ys, zs = [ ], [ ], [ ]
-    for (x,y), z in np.ndenumerate( mat ):
-        xs.append( x )
-        ys.append( y )
-        zs.append( z )
-    return tikzpicture_matrix( xs, ys, zs, **kwargs )
-
-def write_standalone( x, ys, outfile = '', **kwargs ):
-    text = standalone_template( **kwargs )
-    # For each x there could be multiple of ys.
-    pictureText = tikzpicture( x, ys, **kwargs )
-    text = _sub( 'TIKZPICTURE', pictureText, text )
-    # Write to file or print to stdout.
-    if outfile:
-        print( 'Writing to %s' % outfile )
-        with open( outfile, 'w' ) as f:
-            f.write( text ) 
+    # If given data is list of tuples, add 2d plots.
+    if type( data) is np.ndarray:
+        axis = tikz_imshow( pic, data, **kwargs )
     else:
-        print( text )
+        axis = tikz_addplot( pic, data, **kwargs )
 
-def write_standalone_matrix( mat, outfile = '', **kwargs ):
-    """write_standalone_matrix Given a 2d matrix, generate a pgfplot file.
-    Matrix is a special case of 3d surf plot.
+    # attach legend to the last axis. When multiple axises are used,
+    # \addlegendentry overwrites previous entry.
+    # Make sure that previous axis has appropriate \addlegendimage 
+    if axis is not None:
+        if kwargs.get( 'legend', '' ):
+            attachLegends( pic, kwargs[ 'legend'], **kwargs )
+        
+    if axis is not None:
+        # Attach label to tikz-picture.
+        if kwargs.get( 'label', '' ):
+            lE = ET.Element( 'node', xshift='-1cm', yshift='1cm' )
+            lE.text = ' (label) at (rel axis cs:0,1) { %s }; ' % kwargs[ 'label' ]
+            pic.append( lE )
 
-    :param mat:
-    :param outfile:
-    :param **kwargs:
+    return doc.tex( )
+
+def standalone( *plots, **kwargs ):
+    """Write a standalone file
     """
-    # Make axis virgin.
-    kwargs[ 'virgin_axis' ] = True
-    template = standalone_template( **kwargs )
-    matrix = matrixPlot( mat, **kwargs )
-    text = _sub( 'TIKZPICTURE', matrix, template )
-    if outfile:
-        with open( outfile, 'w' ) as f:
+    template = latex.standalone_template( **kwargs )
+    if len( plots ) > 0:
+        picTex = tikzpicture( plots, **kwargs )
+    else:
+        picTex = tikzpicture( kwargs.get( 'matrix' ), **kwargs )
+
+    # Add plot text to tikzpicture.
+    text = helper._sub( 'TIKZPICTURE', picTex, template )
+
+    outfile = kwargs.get( 'outfile', '' )
+    if not outfile:
+        print( text )
+    else:
+        with open( outfile, 'w' ) as  f:
             f.write( text )
-    else:
-        print( text )
 
 if __name__ == '__main__':
     main()
