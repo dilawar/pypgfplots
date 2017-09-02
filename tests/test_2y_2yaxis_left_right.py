@@ -17,7 +17,6 @@ pypgfplots.standalone( (x, y1), (x, y2)
         , outfile = '%s.tex' % sys.argv[0] 
         , xlabel = 'Time'
         , color = [ 'red', 'blue' ]
-        # Don't using ylabel when multiple series are plotted. Use ylabels.
         , ylabel = [ 'conc', 'N' ]
         , title = "Plot with Index."
         , legends = [ "Series A", "Series B" ]
