@@ -24,7 +24,7 @@ for f, ftext in zip( files, pytext ):
     text.append( '</td><td>' )
     text.append( '<pre>\n %s \n</pre>' % ftext )
     text.append( '</td><td>' )
-    text.append( '<img src="%s">' % imgname )
+    text.append( '<img src="%s" width="300px">' % imgname )
     text.append( '</td>' )
     text.append( '</tr>' )
 
