@@ -1,118 +1,198 @@
-<h1>Examples </h1>
+<link rel="stylesheet" type="text/css" href="highlight.css" >
+<h1>Examples</h1>
 <table>
 <tr>
 </td><td>
-<pre>
- import sys
-import pypgfplots 
-import numpy as np
 
-np.random.seed( 0 )
+<table class="sourcetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre></div></td><td class="code"><div class="source"><pre><span class="c1"># Having multiple y-axis with 1 x-axis not very well tested. This is a corner</span>
+<span class="c1"># case and should be avoided.</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pypgfplots</span> 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-x = np.arange( 0, 1, 0.1 )
-y1 = np.random.randint( 0, 11, len(x) )
-y2 = np.random.randint( 0, 11, len(x) )
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
 
-# There are two y-series on one y-axis. User should make sure that y1 and y2 can
-# be plotted together.
-pypgfplots.standalone( (x, y1, y2 )
-        , outfile = '%s.tex' % sys.argv[0] 
-        , xlabel = 'Index', ylabel = '$\frac{a}{b}$'
-        , title = "Plot with Index."
-        , legend = [ "Series A", "Series B" ]
-        , axis_attrib = 'legend pos=outer north east'
-        , label = r'\bf a.'
-        )
- 
-</pre>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span> <span class="p">)</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c1"># There are two y-series on two different y-axis. One will be on left and</span>
+<span class="c1"># another will be on right.</span>
+<span class="c1"># be plotted together.</span>
+<span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tex&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Time&#39;</span>
+        <span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span> <span class="p">]</span>
+        <span class="c1"># Don&#39;t using ylabel when multiple series are plotted. Use ylabels.</span>
+        <span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;conc&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span> <span class="p">]</span>
+        <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Plot with Index.&quot;</span>
+        <span class="p">,</span> <span class="n">legends</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Series A&quot;</span><span class="p">,</span> <span class="s2">&quot;Series B&quot;</span> <span class="p">]</span>
+        <span class="p">,</span> <span class="n">axis_attrib</span> <span class="o">=</span> <span class="s1">&#39;legend pos=outer north east&#39;</span>
+        <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf a.&#39;</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
 </td><td>
-<img src="test_2y_1yaxis.py.png">
+<img src="test_2y_2yaxis_left_right.py.png" width="500px">
 </td>
 </tr>
 <tr>
 </td><td>
-<pre>
- # Having multiple y-axis with 1 x-axis not very well tested. This is a corner
-# case and should be avoided.
-import sys
-import pypgfplots 
-import numpy as np
 
-np.random.seed( 1 )
+<table class="sourcetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre></div></td><td class="code"><div class="source"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pypgfplots</span> 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-x = np.arange( 0, 1, 0.1 )
-y1 = np.random.randint( 0, 11, len(x) )
-y2 = np.random.randint( 11, 101, len(x) )
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
 
-# There are two y-series on two different y-axis. One will be on left and
-# another will be on right.
-# be plotted together.
-pypgfplots.standalone( (x, y1), (x, y2)
-        , outfile = '%s.tex' % sys.argv[0] 
-        , xlabel = 'Time'
-        , color = [ 'red', 'blue' ]
-        # Don't using ylabel when multiple series are plotted. Use ylabels.
-        , ylabel = [ 'conc', 'N' ]
-        , title = "Plot with Index."
-        , legends = [ "Series A", "Series B" ]
-        , axis_attrib = 'legend pos=outer north east'
-        , label = r'\bf a.'
-        )
- 
-</pre>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span> <span class="p">)</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c1"># There are two y-series on one y-axis. User should make sure that y1 and y2 can</span>
+<span class="c1"># be plotted together.</span>
+<span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="p">)</span>
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tex&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Index&#39;</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;$</span><span class="se">\f</span><span class="s1">rac{a}{b}$&#39;</span>
+        <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Plot with Index.&quot;</span>
+        <span class="p">,</span> <span class="n">legend</span> <span class="o">=</span> <span class="p">[</span> <span class="s2">&quot;Series A&quot;</span><span class="p">,</span> <span class="s2">&quot;Series B&quot;</span> <span class="p">]</span>
+        <span class="p">,</span> <span class="n">axis_attrib</span> <span class="o">=</span> <span class="s1">&#39;legend pos=outer north east&#39;</span>
+        <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf a.&#39;</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
 </td><td>
-<img src="test_2y_2yaxis_left_right.py.png">
+<img src="test_2y_1yaxis.py.png" width="500px">
 </td>
 </tr>
 <tr>
 </td><td>
-<pre>
- import sys
-import pypgfplots
-import numpy as np
 
-np.random.seed( 10 )
+<table class="sourcetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16</pre></div></td><td class="code"><div class="source"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pypgfplots</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-mat = np.random.rand( 10, 10 )
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span> <span class="mi">10</span> <span class="p">)</span>
 
-pypgfplots.standalone( 
-        matrix = mat
-        , outfile = '%s.tex' % sys.argv[0] 
-        , title = 'Measurement matrix'
-        , xlabel = 'Index'
-        , ylabel = 'Index'
-        , label = r'\bf b.'
-        )
- 
-</pre>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+
+<span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> 
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">mat</span>
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tex&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Measurement matrix&#39;</span>
+        <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Index&#39;</span>
+        <span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;Index&#39;</span>
+        <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf b.&#39;</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
 </td><td>
-<img src="test_imshow.py.png">
+<img src="test_imshow.py.png" width="500px">
 </td>
 </tr>
 <tr>
 </td><td>
-<pre>
- import sys
-import pypgfplots
-import numpy as np
 
-np.random.seed( 0 )
-# Genearte a random matrix.
-mat = np.random.rand( 10, 10 )
+<table class="sourcetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="source"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pypgfplots</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-pypgfplots.standalone( matrix = mat
-        , outfile = '%s.tex' % sys.argv[0] 
-        , title = 'Measurement matrix'
-        , xlabel = 'Index'
-        , ylabel = 'Index'
-         # If indices are not given then we compute the tick location.
-        , ytick = [ (1,'c1'), (3,'c2'), (6,'c3') ]  
-        , label = r'\bf b.'
-        )
- 
-</pre>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="c1"># Genearte a random matrix.</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+
+<span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">mat</span>
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tex&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Measurement matrix&#39;</span>
+        <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Index&#39;</span>
+        <span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;Index&#39;</span>
+         <span class="c1"># If indices are not given then we compute the tick location.</span>
+        <span class="p">,</span> <span class="n">ytick</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;c1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;c2&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="s1">&#39;c3&#39;</span><span class="p">)</span> <span class="p">]</span>  
+        <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf b.&#39;</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
 </td><td>
-<img src="test_imshow_with_custom_labels.py.png">
+<img src="test_imshow_with_custom_labels.py.png" width="500px">
 </td>
 </tr>
 </table>
