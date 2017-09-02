@@ -19,11 +19,10 @@ import latex
 import helper
 
 def dataToTableText( data_dict, **kwargs ):
-    every = int( kwargs.get( 'every', 1 ))
     header, cols = [ ], [ ]
     for k in data_dict.keys( ): 
         # Matrix plot, insert a new line every time row index change.
-        s = data_dict[ k ][::every]
+        s = data_dict[ k ]
         if len(s) > 0:
             cols.append( s )
             header.append( k )
@@ -92,6 +91,11 @@ def addPlotXML( x, y, z=[], id_=0, **kwargs ):
     return plot
 
 def addImshowXML( mat, **kwargs ):
+    # Resample data
+    if kwargs.get( 'every', 1 ) > 1:
+        N = int( kwargs[ 'every' ] )
+        mat = mat[::N,::N]
+
     nrows = mat.shape[0]
     attr = plotAttr( **kwargs )
     attr[ 'matrix plot*'] = ''

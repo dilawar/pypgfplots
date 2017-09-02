@@ -55,9 +55,9 @@ for f, ftext in zip( files, pytext ):
     text.append( '<tr>' )
     text.append( '</td><td>' )
     code = pygments.highlight( ftext, lexer, formatter )
-    text.append( '<div class="highlight">%s </div>' % code )
+    text.append( '<div class="highlight" width="500px">{0}</div>'.format(code) )
     text.append( '</td><td>' )
-    text.append( '<img src="%s" width="500px">' % url )
+    text.append( '<img src="{0}" width="500px">'.format(url) )
     text.append( '</td>' )
     text.append( '</tr>' )
 

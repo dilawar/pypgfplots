@@ -27,5 +27,5 @@ png : ./pypgfplots.py
 %.png : %.pdf 
 	convert $< $@
 
-docs : $(TEST_SCRIPTS)
+docs : $(TEST_SCRIPTS) ./docs/generate_docs.py
 	cd docs && $(MAKE)
