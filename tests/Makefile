@@ -2,6 +2,7 @@ TESTSCRIPTS:=$(wildcard *.py)
 TEXS:=$(TESTSCRIPTS:.py=.py.tex)
 PDFS:=$(TEXS:.tex=.pdf)
 PNGS:=$(PDFS:.pdf=.png)
+PYTHON:=python
 
 all : test png
 

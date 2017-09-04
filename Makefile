@@ -1,4 +1,4 @@
-PYTHON=python
+PYTHON:=python
 TEST_SCRIPTS:=$(wildcard ./tests/*.py)
 
 all : build docs test
@@ -30,4 +30,4 @@ png : ./pypgfplots.py
 	convert $< $@
 
 docs : $(TEST_SCRIPTS) ./docs/generate_docs.py
-	cd docs && $(MAKE)
+	cd docs && $(MAKE) PYTHON=$(PYTHON)
