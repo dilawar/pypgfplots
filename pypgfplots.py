@@ -28,8 +28,10 @@ def dataToTableText( data_dict, **kwargs ):
             header.append( k )
 
     header = ' '.join( header )
-    data = np.vstack( cols ).T
     coords = [ header ]
+
+    data = np.vstack( cols ).T
+
     for s in data:
         s = map( lambda x: '%g' % x, s )
         coords.append( ' '.join( s ) )
@@ -65,7 +67,7 @@ def attachTexLabel( plot, id_ ):
 
 def plotAttr( **kwargs ):
     cl = kwargs.get( 'color', '' )
-    attr = { }
+    attr = { 'shader' : 'flat' }
     if cl:
         attr[ 'color' ] = cl
         attr[ 'mark options' ] = '{fill=%s}' % cl
@@ -82,6 +84,11 @@ def addPlotXML( x, y, z=[], id_=0, **kwargs ):
     attr = plotAttr( **kwargs )
     plot = ET.Element( 'addplot+', **attr )
     tableElem = ET.Element( 'table', x='x', y='y', z='z' )
+
+    every = kwargs.get( 'every', 1)
+    if every > 1:
+        x, y, z = x[::every], y[::every], z[::every]
+
     attachData( tableElem, dict( x=x, y=y, z=z), **kwargs )
     plot.append( tableElem )
     
@@ -92,24 +99,35 @@ def addPlotXML( x, y, z=[], id_=0, **kwargs ):
 
 def addImshowXML( mat, **kwargs ):
     # Resample data
-    if kwargs.get( 'every', 1 ) > 1:
-        N = int( kwargs[ 'every' ] )
-        mat = mat[::N,::N]
+    every = kwargs.get( 'every', 1 )
+    if hasattr( every, '__iter__' ):
+        everyRow, everyCol = every[:2]
+    else:
+        everyRow, everyCol = every, every
 
-    nrows = mat.shape[0]
+    nrows, ncols = mat.shape
+
     attr = plotAttr( **kwargs )
     attr[ 'matrix plot*'] = ''
-    attr[ 'mesh/rows' ] = nrows
-    image = ET.Element( 'addplot', **attr )
+    attr[ 'mesh/rows' ] = nrows / everyRow
 
+    # If I set this option, I do not get a square image even though I have same
+    # numbers of rows and columns.
+    ## attr[ 'mesh/cols' ] = nrows / everyCol
+
+    image = ET.Element( 'addplot', **attr )
     tabAttrib = dict( x='x', y='y', meta = 'meta', point_meta='explicit' )
     tableElem = ET.Element( 'table', **tabAttrib )
 
     x, y, z = [], [], []
+
+    print( 'Every %d and %d' % (everyRow, everyCol) )
     for (i, j), v in np.ndenumerate( mat ):
-        x.append( i )
-        y.append( j )
-        z.append( v )
+        if i % everyRow == 0:
+            if j % everyCol == 0:
+                x.append( i )
+                y.append( j )
+                z.append( v )
 
     attachData( tableElem, dict(x=x, y=y, meta=z), **kwargs )
     image.append( tableElem )
@@ -208,6 +226,7 @@ def tikz_imshow( pic, mat, **kwargs ):
     axis = getDefaultAxis( **kwargs )
     axis.attrib[ 'colorbar' ] = ''
     axis.attrib[ 'colormap name' ] = 'viridis'
+    axis.attrib[ 'enlargelimits' ] = '{abs=0.5}'
     plot = addImshowXML( mat, **kwargs )
     axis.append( plot )
     attachTicks( axis, **kwargs )

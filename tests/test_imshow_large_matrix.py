@@ -10,9 +10,9 @@ mat = np.random.rand( 1000, 1000 )
 pypgfplots.standalone( 
         matrix = mat
         , outfile = '%s.tex' % sys.argv[0] 
-        , title = 'A very large matrix'
+        , title = 'A very large matrix for pdflatex'
         , xlabel = 'Index'
         , ylabel = 'Index'
-        , every = 10   # Matix is too big, sample every 100 rows/columns
+        , every = (10,20) # Plot every 10th row and 20th column.
         , label = r'\bf b.'
         )
