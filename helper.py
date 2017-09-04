@@ -11,6 +11,7 @@ __status__           = "Development"
 
 import sys
 import os
+import subprocess
 
 delimiter_ = '@@'
 
@@ -84,3 +85,26 @@ def merge_dict( dict1, dict2 ):
     for k in dict2:
         combined[k] = dict2[k]
     return combined
+
+
+def savefile( text, filename ):
+    # definately save a tex file.
+    dirname = os.path.dirname( filename )
+    basename = os.path.basename( filename )
+    nameWe = '.'.join( basename.split( '.' )[:-1] )            # drop extention.
+    texfile = os.path.join( dirname, nameWe + '.tex' )
+    with open( texfile, 'w' ) as f:
+        f.write( text )
+
+    ext = filename.split( '.' )[-1].strip( )
+    if ext.lower in [ 'pdf' ]:
+        subprocess.call( [ 'pdflatex', '--shell-escape', texfile ] )
+    elif ext.lower in [ 'ps' ]:
+        subprocess.call( [ 'latex', '--shell-escape', texfile ] )
+    else:
+        with open( filename, 'w' ) as  f:
+            f.write( text )
+
+    # Remove tex-file if user specified name is different.
+    if filename != texfile:
+        os.unlink( texfile )

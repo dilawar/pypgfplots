@@ -291,11 +291,11 @@ def standalone( *plots, **kwargs ):
     text = helper._sub( 'TIKZPICTURE', picTex, template )
 
     outfile = kwargs.get( 'outfile', '' )
-    if not outfile:
-        print( text )
+    if outfile:
+        helper.savefile( text, outfile )
     else:
-        with open( outfile, 'w' ) as  f:
-            f.write( text )
+        print( text )
+
 
 if __name__ == '__main__':
     main()
