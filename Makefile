@@ -1,14 +1,16 @@
+PYTHON=python
 TEST_SCRIPTS:=$(wildcard ./tests/*.py)
 
 all : build docs test
 	@echo "All done"
 
 build :
-	python -m compileall .
-	python setup.py build
+	$(PYTHON) -m compileall .
+	$(PYTHON) -m compileall .
+	$(PYTHON) setup.py build
 
 install :
-	python setup.py install --user
+	$(PYTHON) setup.py install --user
 
 test : ./pypgfplots.py $(TEST_SCRIPTS)
 	( cd tests && $(MAKE) )
@@ -19,7 +21,7 @@ png : ./pypgfplots.py
 	@echo "PNG generation done"
 
 %.py.tex : %.py
-	PYTHONPATH=. python $<
+	PYTHONPATH=. $(PYTHON) $<
 
 %.pdf : %.tex
 	pdflatex $<

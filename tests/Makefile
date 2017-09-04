@@ -13,7 +13,7 @@ png : $(PNGS)
 	rsync -azv *.png ../docs
 
 %.py.tex : %.py
-	PYTHONPATH=$(shell pwd)/.. python $<
+	PYTHONPATH=$(shell pwd)/.. $(PYTHON) $<
 
 %.pdf : %.tex
 	pdflatex -interaction nonstopmode $<

@@ -121,11 +121,11 @@ def addImshowXML( mat, **kwargs ):
 
     attr = plotAttr( **kwargs )
     attr[ 'matrix plot'] = ''
-    attr[ 'mesh/rows' ] = nrows / everyRow
+    attr[ 'mesh/rows' ] = int( nrows / everyRow)
 
     # If I set this option, I do not get a square image even though I have same
     # numbers of rows and columns.
-    ## attr[ 'mesh/cols' ] = nrows / everyCol
+    ## attr[ 'mesh/cols' ] = int( nrows / everyCol)
 
     image = ET.Element( 'addplot', **attr )
     tabAttrib = dict( x='x', y='y', meta = 'meta', point_meta='explicit' )
