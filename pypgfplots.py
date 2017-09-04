@@ -18,6 +18,18 @@ import pgfxml
 import latex
 import helper
 
+# Create a dictionary of default options.
+default_ = { 
+        'axis' : [ 'xlabel=', 'ylabel=', 'title='
+            , 'legend style={draw=none,fill=none,font=\footnotesize}'  
+            # Equivalent to matplotlib 'interpolation' option. Available options
+            # are. No checks are performed.
+            # pgfplots/shader=flat|interp|faceted|flat corner|flat mean|faceted
+            , 'shader=flat'
+            , 'axis y line=box' ]
+        , 'tikzpicture' : [ 'scale=1', 'xshift=0', 'yshift=0' ]
+        }
+
 def dataToTableText( data_dict, **kwargs ):
     header, cols = [ ], [ ]
     for k in data_dict.keys( ): 
@@ -67,7 +79,7 @@ def attachTexLabel( plot, id_ ):
 
 def plotAttr( **kwargs ):
     cl = kwargs.get( 'color', '' )
-    attr = { 'shader' : 'flat' }
+    attr = dict( )
     if cl:
         attr[ 'color' ] = cl
         attr[ 'mark options' ] = '{fill=%s}' % cl
@@ -108,7 +120,7 @@ def addImshowXML( mat, **kwargs ):
     nrows, ncols = mat.shape
 
     attr = plotAttr( **kwargs )
-    attr[ 'matrix plot*'] = ''
+    attr[ 'matrix plot'] = ''
     attr[ 'mesh/rows' ] = nrows / everyRow
 
     # If I set this option, I do not get a square image even though I have same
@@ -135,20 +147,18 @@ def addImshowXML( mat, **kwargs ):
     return image
 
 def getDefaultAxis( **kwargs ):
-    default = helper.keyvalToDict( [ 'xlabel=', 'ylabel=', 'title='
-        , 'legend style={draw=none,fill=none,font=\footnotesize}'  
-        , 'axis y line=box'
-        ]  )
+    global default_ 
+    axisDefault = helper.keyvalToDict( default_[ 'axis' ] )
 
-    # Also add the user specified attributes.
-    default = helper.keyvalToDict( kwargs.get( 'axis_attrib', '' ), default )
+    # Also merge the user specified attributes.
+    axisDefault = helper.keyvalToDict( kwargs.get( 'axis_attrib', '' ), axisDefault )
 
-    # Overwrite any default by global kwargs.
-    for k in default:
+    # Overwrite any default by global.
+    for k in axisDefault:
         if kwargs.get( k ):
-            default[k] = helper.clean( kwargs[k] )
+            axisDefault[k] = helper.clean( kwargs[k] )
 
-    axis = ET.Element( 'axis', **default )
+    axis = ET.Element( 'axis', **axisDefault )
     return axis
 
 def attachLegends( pic, legends, **kwargs ):
@@ -237,8 +247,12 @@ def tikz_imshow( pic, mat, **kwargs ):
 def tikzpicture( data, **kwargs ):
     doc = pgfxml.PGFPlot( )
 
-    # Geneate plots.
+
+    # Get tikzpicture and merge attributes.
     pic = doc.root
+    defaultPicAttr = helper.keyvalToDict( default_[ 'tikzpicture' ] )
+    pic.attrib = helper.merge_dict( defaultPicAttr, pic.attrib )
+
     axis = None
 
     # If given data is list of tuples, add 2d plots.
@@ -254,6 +268,7 @@ def tikzpicture( data, **kwargs ):
         if kwargs.get( 'legend', '' ):
             attachLegends( pic, kwargs[ 'legend'], **kwargs )
         
+
     if axis is not None:
         # Attach label to tikz-picture.
         if kwargs.get( 'label', '' ):

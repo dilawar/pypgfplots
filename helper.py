@@ -73,3 +73,14 @@ def is_sequence(arg):
     return (not hasattr(arg, "strip") and
             hasattr(arg, "__getitem__") or
             hasattr(arg, "__iter__"))
+
+
+def merge_dict( dict1, dict2 ):
+    '''Merge two dictionaries.
+    '''
+    combined = dict( )
+    for k in dict1:
+        combined[k] = dict1[k]
+    for k in dict2:
+        combined[k] = dict2[k]
+    return combined

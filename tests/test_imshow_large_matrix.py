@@ -11,8 +11,9 @@ pypgfplots.standalone(
         matrix = mat
         , outfile = '%s.tex' % sys.argv[0] 
         , title = 'A very large matrix for pdflatex'
-        , xlabel = 'Index'
-        , ylabel = 'Index'
+        , shader = 'interp'
+        , xlabel = 'A(i)'
+        , ylabel = 'f(A(i))'
         , every = (10,20) # Plot every 10th row and 20th column.
         , label = r'\bf b.'
         )
