@@ -98,7 +98,7 @@ def savefile( text, filename ):
 
     ext = filename.split( '.' )[-1].strip( )
     if ext.lower in [ 'pdf' ]:
-        subprocess.call( [ 'pdflatex', '--shell-escape', texfile ] )
+        subprocess.call( [ 'lualatex', '--shell-escape', texfile ] )
     elif ext.lower in [ 'ps' ]:
         subprocess.call( [ 'latex', '--shell-escape', texfile ] )
     else:
