@@ -96,11 +96,15 @@ def savefile( text, filename ):
     with open( texfile, 'w' ) as f:
         f.write( text )
 
-    ext = filename.split( '.' )[-1].strip( )
-    if ext.lower in [ 'pdf' ]:
-        subprocess.call( [ 'lualatex', '--shell-escape', texfile ] )
-    elif ext.lower in [ 'ps' ]:
-        subprocess.call( [ 'latex', '--shell-escape', texfile ] )
+    ext = filename.split( '.' )[-1].strip( ).lower( )
+    if ext in [ 'pdf' ]:
+        cmd =  "lualatex --shell-escape %s" % texfile 
+        print( 'Executing %s' % cmd )
+        subprocess.call( cmd.split( ) )
+    elif ext in [ 'ps' ]:
+        cmd =  "latex --shell-escape %s" % texfile 
+        print( 'Executing %s' % cmd )
+        subprocess.call( cmd.split( ) )
     else:
         with open( filename, 'w' ) as  f:
             f.write( text )
