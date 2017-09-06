@@ -84,6 +84,7 @@ def merge_dict( dict1, dict2 ):
         combined[k] = dict1[k]
     for k in dict2:
         combined[k] = dict2[k]
+
     return combined
 
 
@@ -109,6 +110,6 @@ def savefile( text, filename ):
         with open( filename, 'w' ) as  f:
             f.write( text )
 
-    # Remove tex-file if user specified name is different.
-    if filename != texfile:
-        os.unlink( texfile )
+    ## Remove tex-file if user specified name is different.
+    #if filename != texfile:
+    #    os.unlink( texfile )

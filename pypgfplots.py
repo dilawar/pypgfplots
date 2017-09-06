@@ -249,12 +249,10 @@ def tikzpicture( data, **kwargs ):
 
 
     # Get tikzpicture and merge attributes.
+
     pic = doc.root
-    defaultPicAttr = helper.keyvalToDict( default_[ 'tikzpicture' ] )
-    pic.attrib = helper.merge_dict( defaultPicAttr, pic.attrib )
 
     axis = None
-
     # If given data is list of tuples, add 2d plots.
     if type( data) is np.ndarray:
         axis = tikz_imshow( pic, data, **kwargs )
