@@ -156,7 +156,9 @@ def getDefaultAxis( **kwargs ):
     # Overwrite any default by global.
     for k in axisDefault:
         if kwargs.get( k ):
-            axisDefault[k] = '{ %s }' % helper.clean( kwargs[k] )
+            axisDefault[k] = '%s' % helper.clean( kwargs[k] )
+            if k in [ 'title', 'xlabel', 'ylabel' ]:
+                axisDefault[k] = '{%s}' % helper.clean( kwargs[k] )
 
     axis = ET.Element( 'axis', **axisDefault )
     return axis
