@@ -71,9 +71,11 @@ def remove_chars( text, chars ):
     return text
 
 def is_sequence(arg):
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
+    if type( arg ) == str:
+        return False
+    if type( arg) == unicode:
+        return False
+    return hasattr(arg, "__getitem__") or hasattr(arg, "__iter__"))
 
 
 def merge_dict( dict1, dict2 ):
