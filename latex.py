@@ -18,6 +18,7 @@ def standalone_template( **kwargs ):
     defaultStandaloneAttribText = helper.get_default_attribs( [ 'multi=false' ], **kwargs )
     res += [ '\\documentclass[tikz,preview,multi=false]{standalone}' ]
     res += [ '\\usepackage{pgfplots}' ]
+    #  res += [ '\\usepackage{multirow}' ]
     res += [ '\\usepgfplotslibrary{groupplots}' ]
     res += [ '\\renewcommand{\\familydefault}{\\sfdefault}' ]
     res += [ '\\begin{document}' ]

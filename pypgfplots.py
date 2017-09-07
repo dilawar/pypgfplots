@@ -27,7 +27,7 @@ default_ = {
             # pgfplots/shader=flat|interp|faceted|flat corner|flat mean|faceted
             , 'shader=flat'
             , 'axis y line=box' ]
-        , 'tikzpicture' : [ 'scale=1', 'xshift=0', 'yshift=0' ]
+        , 'tikzpicture' : [ 'scale=1', 'xshift=0', 'yshift=0', 'baseline' ]
         }
 
 def dataToTableText( data_dict, **kwargs ):
@@ -83,6 +83,7 @@ def plotAttr( **kwargs ):
     if cl:
         attr[ 'color' ] = cl
         attr[ 'mark options' ] = '{fill=%s}' % cl
+    helper.attachExtraAttrib( kwargs.get( 'plot_attrib', '' ), attr )
     return attr
 
 def addPlotXML( x, y, z=[], id_=0, **kwargs ):
@@ -95,6 +96,10 @@ def addPlotXML( x, y, z=[], id_=0, **kwargs ):
     """
     attr = plotAttr( **kwargs )
     plot = ET.Element( 'addplot+', **attr )
+
+    #  xExpr = kwargs.get( 'x', 'x' )
+    #  yExpr = kwargs.get( 'y', 'y' )
+    #  yExpr = kwargs.get( 'y', 'y' )
     tableElem = ET.Element( 'table', x='x', y='y', z='z' )
 
     every = kwargs.get( 'every', 1)
@@ -230,6 +235,30 @@ def tikz_addplot( pic, data, **kwargs ):
             raise UserWarning( 'Invalid data' )
     return axis
 
+def tikz_addhist( pic, vec, **kwargs ):
+    """Plot histogram.
+    """
+    ylabel = kwargs.get( 'ylabel', '' )
+    color = kwargs.get( 'color', '' )
+    axis, numPlots = None, 0
+
+    axis = getDefaultAxis( **kwargs )
+    defaultBins = 10
+
+    kwargs[ 'plot_attrib'] = 'hist={data=y, bins=%d,%s}' % (
+            kwargs.get( 'bins', 10 ), kwargs.get( 'hist_attrib', '' )
+            ) + ',%s' % kwargs.get( 'plot_attrib', '' )
+    kwargs[ 'plot_attrib' ] += ',no marks'
+
+    plot = addPlotXML(  np.arange(0, len(vec),1), vec, id_=0, **kwargs )
+    axis.append( plot )
+
+    attachTicks( axis, **kwargs )
+
+    # Append axis at the end.
+    pic.append( axis )
+    return axis
+
 
 def tikz_imshow( pic, mat, **kwargs ):
     nrows, ncols = mat.shape 
@@ -245,21 +274,26 @@ def tikz_imshow( pic, mat, **kwargs ):
     pic.append( axis )
     return axis
 
+def tikzpicture_template( doc, **kwargs ):
+    # Get tikzpicture and merge attributes.
+    pic = doc.root
+    # These are default.
+    helper.attachExtraAttrib( default_[ 'tikzpicture' ], pic.attrib )
+    # These are given by users.
+    helper.attachExtraAttrib( kwargs.get( 'picture_attrib', ''), pic.attrib )
+    return pic
 
 def tikzpicture( data, **kwargs ):
     doc = pgfxml.PGFPlot( )
-
-
-    # Get tikzpicture and merge attributes.
-
-    pic = doc.root
-
+    pic = tikzpicture_template( doc,  **kwargs )
     axis = None
-    # If given data is list of tuples, add 2d plots.
-    if type( data) is np.ndarray:
+
+    if kwargs[ 'pictype' ] == 'matrix':
         axis = tikz_imshow( pic, data, **kwargs )
-    else:
+    elif kwargs[ 'pictype' ] == 'xy':
         axis = tikz_addplot( pic, data, **kwargs )
+    elif kwargs[ 'pictype' ] == 'histogram':
+        axis = tikz_addhist( pic, data, **kwargs )
 
     # attach legend to the last axis. When multiple axises are used,
     # \addlegendentry overwrites previous entry.
@@ -267,7 +301,6 @@ def tikzpicture( data, **kwargs ):
     if axis is not None:
         if kwargs.get( 'legend', '' ):
             attachLegends( pic, kwargs[ 'legend'], **kwargs )
-        
 
     if axis is not None:
         # Attach label to tikz-picture.
@@ -278,18 +311,69 @@ def tikzpicture( data, **kwargs ):
 
     return doc.tex( )
 
-def standalone( *plots, **kwargs ):
+def tabular( grid_dict, **kwargs ):
+    """Plot subplot using tabular environment
+    """
+    tabular = { }
+    grid = grid_dict.keys( )
+    for k in grid:
+        plot = grid_dict[ k ]
+        plotTex = standalone_helper( **plot )
+        tabular[k] = plotTex
+
+    # Currently we make subplots using tabular environment.
+    r, c = map(max, zip( *grid ))
+    tabTex = [ '\\begin{tabular}{%s}' % ' '.join( [ 'l' for i in range(c+1)] ) ]
+    allRows = [ ]
+    for ri in range( r+1 ):
+        colspan = int( kwargs.get( 'colspan', 1 ) )
+        rowTex = [ ]
+        for ci in range( c+1 ):
+            entryTex = tabular.get( (ri, ci), ' ' )
+            #rowTex.append( ' \\multicolumn{%d}{r}{%s} ' % (colspan, entryTex ))
+            rowTex.append( ' %s ' % (entryTex ))
+        allRows.append( ' & '.join( rowTex )  )
+
+    tabTex.append( ' \\\\ \n'.join( allRows ) )
+
+    tabTex.append( '\\end{tabular}' )
+    tex = '\n'.join( tabTex )
+    return tex
+
+
+def standalone_helper( *plots, **kwargs ):
     """Write a standalone file
     """
-    template = latex.standalone_template( **kwargs )
+    picTex = ''
     if len( plots ) > 0:
+        kwargs[ 'pictype' ] = 'xy'
         picTex = tikzpicture( plots, **kwargs )
     else:
-        picTex = tikzpicture( kwargs.get( 'matrix' ), **kwargs )
+        # Either matrix of subplots.
+        if 'matrix' in kwargs:
+            kwargs[ 'pictype' ] = 'matrix'
+            picTex = tikzpicture( kwargs['matrix'], **kwargs )
+        elif 'xy' in kwargs:
+            kwargs[ 'pictype' ] = 'xy'
+            picTex = tikzpicture( [ kwargs['xy'] ], **kwargs )
+        elif 'subplots' in kwargs:
+            picTex = tabular( kwargs['subplots'], **kwargs ) 
+        elif 'histogram' in kwargs:
+            kwargs[ 'pictype' ] = 'histogram'
+            picTex = tikzpicture( kwargs['histogram'], **kwargs ) 
+        else:
+            print( '[Warning] Un-supported function call.' )
+
+    return picTex 
+
+
+def standalone( *plots, **kwargs ):
+    template = latex.standalone_template( **kwargs )
+
+    tex = standalone_helper( *plots, **kwargs )
 
     # Add plot text to tikzpicture.
-    text = helper._sub( 'TIKZPICTURE', picTex, template )
-
+    text = helper._sub( 'TIKZPICTURE', tex, template )
     outfile = kwargs.get( 'outfile', '' )
     if outfile:
         helper.savefile( text, outfile )

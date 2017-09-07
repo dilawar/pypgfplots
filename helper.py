@@ -15,6 +15,19 @@ import subprocess
 
 delimiter_ = '@@'
 
+
+def which(file):
+    for path in os.environ["PATH"].split(os.pathsep):
+        if os.path.exists(os.path.join(path, file)):
+                return os.path.join(path, file)
+    return None
+
+latexFound_ = True
+LATEX = which( 'lualatex' ) or which( 'pdflatex' )
+if LATEX is None:
+    latexFound_ = False
+
+
 def get_default_attribs( listofkeyval, **kwargs ):
     ''' listofkeyval: list 'key=val' or a ;-separated string e.g
     'key1=val1;key2=val2''
@@ -65,6 +78,9 @@ def keyvalToDict( listofkeyval, attr = { } ):
 
     return attr 
 
+def attachExtraAttrib( listofkeyval, attr ):
+    keyvalToDict( listofkeyval, attr )
+
 def remove_chars( text, chars ):
     for c in chars:
         text = text.replace( c, '' )
@@ -90,6 +106,7 @@ def merge_dict( dict1, dict2 ):
 
 def savefile( text, filename ):
     # definately save a tex file.
+    global LATEX
     dirname = os.path.dirname( filename )
     basename = os.path.basename( filename )
     nameWe = '.'.join( basename.split( '.' )[:-1] )            # drop extention.
@@ -99,13 +116,19 @@ def savefile( text, filename ):
 
     ext = filename.split( '.' )[-1].strip( ).lower( )
     if ext in [ 'pdf' ]:
-        cmd =  "lualatex --shell-escape %s" % texfile 
-        print( 'Executing %s' % cmd )
-        subprocess.call( cmd.split( ) )
+        if latexFound_:
+            cmd =  "%s --shell-escape %s" % (LATEX, texfile)
+            print( 'Executing %s' % cmd )
+            subprocess.call( cmd.split( ) )
+        else:
+            print( '[WARN] No lualatex/pdflatex found' )
     elif ext in [ 'ps' ]:
-        cmd =  "latex --shell-escape %s" % texfile 
-        print( 'Executing %s' % cmd )
-        subprocess.call( cmd.split( ) )
+        if latexFound_:
+            cmd =  "latex --shell-escape %s" % texfile 
+            print( 'Executing %s' % cmd )
+            subprocess.call( cmd.split( ) )
+        else:
+            print( '[WARN] No latex found' )
     else:
         with open( filename, 'w' ) as  f:
             f.write( text )
