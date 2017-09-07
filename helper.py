@@ -12,6 +12,7 @@ __status__           = "Development"
 import sys
 import os
 import subprocess
+import tempfile
 
 delimiter_ = '@@'
 
@@ -108,6 +109,8 @@ def savefile( text, filename ):
     # definately save a tex file.
     global LATEX
     dirname = os.path.dirname( filename )
+    auxD = tempfile.gettempdir( )
+    outD = dirname
     basename = os.path.basename( filename )
     nameWe = '.'.join( basename.split( '.' )[:-1] )            # drop extention.
     texfile = os.path.join( dirname, nameWe + '.tex' )
@@ -115,16 +118,17 @@ def savefile( text, filename ):
         f.write( text )
 
     ext = filename.split( '.' )[-1].strip( ).lower( )
+    texargs = '-aux-director %s -output-directory %s' % ( auxD, outD )
     if ext in [ 'pdf' ]:
         if latexFound_:
-            cmd =  "%s --shell-escape %s" % (LATEX, texfile)
+            cmd =  "%s -shell-escape %s %s" % (LATEX, texargs, texfile)
             print( 'Executing %s' % cmd )
             subprocess.call( cmd.split( ) )
         else:
             print( '[WARN] No lualatex/pdflatex found' )
     elif ext in [ 'ps' ]:
         if latexFound_:
-            cmd =  "latex --shell-escape %s" % texfile 
+            cmd =  "latex --shell-escape %s %s" % (texargs, texfile)
             print( 'Executing %s' % cmd )
             subprocess.call( cmd.split( ) )
         else:
