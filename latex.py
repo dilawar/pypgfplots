@@ -20,6 +20,8 @@ def standalone_template( **kwargs ):
     res += [ '\\usepackage{pgfplots}' ]
     #  res += [ '\\usepackage{multirow}' ]
     res += [ '\\usepgfplotslibrary{groupplots}' ]
+    res += [ '\\usepgfplotslibrary{statistics}' ]
+    res += [ '\\pgfplotsset{compat=newest}' ]
     res += [ '\\renewcommand{\\familydefault}{\\sfdefault}' ]
     res += [ '\\begin{document}' ]
     res += [ helper._m( 'TIKZPICTURE' ) ]

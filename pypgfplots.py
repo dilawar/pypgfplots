@@ -153,6 +153,7 @@ def addImshowXML( mat, **kwargs ):
 
 def getDefaultAxis( **kwargs ):
     global default_ 
+
     axisDefault = helper.keyvalToDict( default_[ 'axis' ] )
 
     # Also merge the user specified attributes.
@@ -164,8 +165,16 @@ def getDefaultAxis( **kwargs ):
             axisDefault[k] = '%s' % helper.clean( kwargs[k] )
             if k in [ 'title', 'xlabel', 'ylabel' ]:
                 axisDefault[k] = '{%s}' % helper.clean( kwargs[k] )
-
+    
     axis = ET.Element( 'axis', **axisDefault )
+
+    # Some user defined attributes are sure to be part of axis e.g. xmin, ymax
+    # etc. Attach them to axis.
+    # Do not modify kwargs. It might modify all global kwargs.
+    for k in kwargs:
+        if 'min' in k or 'max' in k:
+            axis.attrib[k] = '%s' % helper.clean( kwargs[k] )
+
     return axis
 
 def attachLegends( pic, legends, **kwargs ):
@@ -197,7 +206,7 @@ def tikz_addplot( pic, data, **kwargs ):
     axis, numPlots = None, 0
     for xys in data:
         if len( xys ) == 2:
-            kwargs[ 'axis y line'] = 'left' if numPlots % 2 == 0 else 'right'
+            #  kwargs[ 'axis y line'] = 'left' if numPlots % 2 == 0 else 'right'
             # Here ylabel can be a list.
             if helper.is_sequence( ylabel ):
                 kwargs[ 'ylabel' ] = ylabel[ numPlots ]
@@ -242,11 +251,15 @@ def tikz_addhist( pic, vec, **kwargs ):
     color = kwargs.get( 'color', '' )
     axis, numPlots = None, 0
 
-    axis = getDefaultAxis( **kwargs )
-    defaultBins = 10
+    binsize = kwargs.get( 'binsize', 0 )
+    if binsize < 1:
+        numBins = 10
+    else:
+        numBins = max( vec ) + 1
 
+    axis = getDefaultAxis( **kwargs )
     kwargs[ 'plot_attrib'] = 'hist={data=y, bins=%d,%s}' % (
-            kwargs.get( 'bins', 10 ), kwargs.get( 'hist_attrib', '' )
+            kwargs.get( 'bins', numBins ), kwargs.get( 'hist_attrib', '' )
             ) + ',%s' % kwargs.get( 'plot_attrib', '' )
     kwargs[ 'plot_attrib' ] += ',no marks'
 
@@ -258,6 +271,31 @@ def tikz_addhist( pic, vec, **kwargs ):
     # Append axis at the end.
     pic.append( axis )
     return axis
+
+def tikz_addboxplots( pic, vec, **kwargs ):
+    """Plot boxplot.
+    """
+
+    ylabel = kwargs.get( 'ylabel', '' )
+    color = kwargs.get( 'color', '' )
+    axis, numPlots = None, 0
+    axis = getDefaultAxis( **kwargs )
+    axis.attrib[ 'boxplot/draw direction'] = 'y'
+
+    if type( vec ) != tuple:
+        vec = (vec, )
+    
+    for v in vec:
+        kwargs[ 'plot_attrib'] = 'boxplot'
+        kwargs[ 'plot_attrib' ] += ',no marks'
+        plot = addPlotXML(  np.arange(0, len(v),1), v, id_=0, **kwargs )
+        axis.append( plot )
+
+    attachTicks( axis, **kwargs )
+    # Append axis at the end.
+    pic.append( axis )
+    return axis
+
 
 
 def tikz_imshow( pic, mat, **kwargs ):
@@ -294,6 +332,8 @@ def tikzpicture( data, **kwargs ):
         axis = tikz_addplot( pic, data, **kwargs )
     elif kwargs[ 'pictype' ] == 'histogram':
         axis = tikz_addhist( pic, data, **kwargs )
+    elif kwargs[ 'pictype' ] == 'boxplot':
+        axis = tikz_addboxplots( pic, data, **kwargs )
 
     # attach legend to the last axis. When multiple axises are used,
     # \addlegendentry overwrites previous entry.
@@ -361,6 +401,9 @@ def standalone_helper( *plots, **kwargs ):
         elif 'histogram' in kwargs:
             kwargs[ 'pictype' ] = 'histogram'
             picTex = tikzpicture( kwargs['histogram'], **kwargs ) 
+        elif 'boxplot' in kwargs:
+            kwargs[ 'pictype' ] = 'boxplot'
+            picTex = tikzpicture( kwargs['boxplot'], **kwargs ) 
         else:
             print( '[Warning] Un-supported function call.' )
 

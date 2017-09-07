@@ -57,22 +57,28 @@ def _sub( name, value, text ):
     return text.replace(  _m( name ), value )
 
 def clean( s ):
-    s = s.replace( "\t", "\\t" )
-    s = s.replace( "\f", "\\f" )
-    s = s.replace( "\b", "\\b" )
-    s = s.replace( "\n", "\\n" )
+    try:
+        s = s.replace( "\t", "\\t" )
+        s = s.replace( "\f", "\\f" )
+        s = s.replace( "\b", "\\b" )
+        s = s.replace( "\n", "\\n" )
+    except Exception as e:
+        pass
+
     return s
 
 def keyvalToDict( listofkeyval, attr = { } ):
     if not listofkeyval:
         return attr
 
-    if not isinstance( listofkeyval, list ):
+    if not is_sequence( listofkeyval ):
         listofkeyval = listofkeyval.split( ';' )
 
     for a in listofkeyval:
         if '=' in a:
             key, val = a.split( '=', 1 )
+            if not val.strip( ):
+                val = '{ }'
         else:
             key, val = a,  ''
         attr[ key.strip() ] = clean( val.strip( ) )
@@ -118,7 +124,12 @@ def savefile( text, filename ):
         f.write( text )
 
     ext = filename.split( '.' )[-1].strip( ).lower( )
-    texargs = '-aux-directory=%s -output-directory=%s ' % ( auxD, outD )
+
+    # Lualatex does not have -aux-directory option.
+    texargs = ''
+    if outD.strip( ):
+        texargs = '-output-directory=%s ' % ( outD )
+
     if ext in [ 'pdf' ]:
         if latexFound_:
             cmd =  "%s -shell-escape %s %s" % (LATEX, texargs, texfile)
