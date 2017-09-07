@@ -220,6 +220,63 @@ convert -density 300 -quality 90 filename.pdf filename.png
 16
 17
 18
+19
+20
+21
+22
+23
+24
+25</pre></div></td><td class="code"><div class="source"><pre><span></span><span class="c1"># Plot subplot in grid.</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pypgfplots</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span> <span class="mi">10</span> <span class="p">)</span>
+
+<span class="n">m1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span>
+<span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">100</span> <span class="p">)</span>
+<span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span> <span class="mi">100</span> <span class="p">)</span>
+
+<span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> 
+        <span class="n">subplots</span> <span class="o">=</span> <span class="p">{</span> 
+              <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">m1</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;mat A&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;a.&#39;</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">y1</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;b.&#39;</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">histogram</span> <span class="o">=</span> <span class="n">y1</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;b.&#39;</span>
+                <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;bins&#39;</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;Count&#39;</span>
+                <span class="p">,</span> <span class="n">plot_attrib</span><span class="o">=</span><span class="s1">&#39;fill=blue!20&#39;</span><span class="p">)</span>
+            <span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">m2</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;d.&#39;</span> <span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.pdf&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Measurement matrix&#39;</span>
+        <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf b.&#39;</span>
+        <span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+</td><td>
+<img src="https://media.githubusercontent.com/media/dilawar/pypgfplots/master/docs/test_pdf.py.png" width="500px">
+</td>
+</tr>
+<tr>
+</td><td>
+<div class="highlight" width="500px"><table class="sourcetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
 19</pre></div></td><td class="code"><div class="source"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">pypgfplots</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -269,7 +326,9 @@ convert -density 300 -quality 90 filename.pdf filename.png
 20
 21
 22
-23</pre></div></td><td class="code"><div class="source"><pre><span></span><span class="c1"># Plot subplot in grid.</span>
+23
+24
+25</pre></div></td><td class="code"><div class="source"><pre><span></span><span class="c1"># Plot subplot in grid.</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">pypgfplots</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -284,11 +343,13 @@ convert -density 300 -quality 90 filename.pdf filename.png
 <span class="n">pypgfplots</span><span class="o">.</span><span class="n">standalone</span><span class="p">(</span> 
         <span class="n">subplots</span> <span class="o">=</span> <span class="p">{</span> 
               <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">m1</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;mat A&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;a.&#39;</span> <span class="p">)</span>
-            <span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">y1</span><span class="p">),</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;plot &#39;</span><span class="p">,</span>
-                <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;b.&#39;</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">y1</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;b.&#39;</span> <span class="p">)</span>
+            <span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">histogram</span> <span class="o">=</span> <span class="n">y1</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;b.&#39;</span>
+                <span class="p">,</span> <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;bins&#39;</span><span class="p">,</span> <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;Count&#39;</span>
+                <span class="p">,</span> <span class="n">plot_attrib</span><span class="o">=</span><span class="s1">&#39;fill=blue!20&#39;</span><span class="p">)</span>
             <span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">m2</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;d.&#39;</span> <span class="p">)</span>
             <span class="p">}</span>
-        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.pdf&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="p">,</span> <span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tex&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
         <span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Measurement matrix&#39;</span>
         <span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">r&#39;\bf b.&#39;</span>
         <span class="p">)</span>

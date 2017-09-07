@@ -118,7 +118,7 @@ def savefile( text, filename ):
         f.write( text )
 
     ext = filename.split( '.' )[-1].strip( ).lower( )
-    texargs = '-aux-director %s -output-directory %s' % ( auxD, outD )
+    texargs = '-aux-directory=%s -output-directory=%s ' % ( auxD, outD )
     if ext in [ 'pdf' ]:
         if latexFound_:
             cmd =  "%s -shell-escape %s %s" % (LATEX, texargs, texfile)
