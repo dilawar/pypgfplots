@@ -3,6 +3,6 @@
 # pgfplots
 Numpy data to pgfplots.
 
-![Examples](https://dilawar.github.io/pypgfplots/)
+[Examples](https://dilawar.github.io/pypgfplots/)
 
 __Work in progress__
