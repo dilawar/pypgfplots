@@ -280,7 +280,8 @@ def tikz_addboxplots( pic, vec, **kwargs ):
     color = kwargs.get( 'color', '' )
     axis, numPlots = None, 0
     axis = getDefaultAxis( **kwargs )
-    axis.attrib[ 'boxplot/draw direction'] = 'y'
+
+    helper.updateDefaultAttribs(axis, [ 'boxplot/draw direction=y' ], **kwargs)
 
     if type( vec ) != tuple:
         vec = (vec, )

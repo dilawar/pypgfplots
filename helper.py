@@ -88,6 +88,11 @@ def keyvalToDict( listofkeyval, attr = { } ):
 def attachExtraAttrib( listofkeyval, attr ):
     keyvalToDict( listofkeyval, attr )
 
+def updateDefaultAttribs( elem, listofkeyval, **user ):
+    default = keyvalToDict( listofkeyval )
+    for k in default:
+        elem.attrib[ k ] = '%s' % clean( user.get( k, default[k] ) )
+
 def remove_chars( text, chars ):
     for c in chars:
         text = text.replace( c, '' )
