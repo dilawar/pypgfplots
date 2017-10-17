@@ -36,7 +36,7 @@ class PGFPlot( ):
         self.root = ET.Element( "tikzpicture", scale='1', xshift='0', yshift='0' )
 
     def add_element( self, root, tag, val ):
-        self.root.apepnd( tag, val )
+        self.root.append( tag, val )
 
     def __str__( self ):
         return ET.tostring( self.root  )

@@ -22,11 +22,13 @@ import helper
 default_ = { 
         'axis' : [ 'xlabel=', 'ylabel=', 'title='
             , 'legend style={draw=none,fill=none,font=\footnotesize}'  
+            , 'enlargelimits=auto'
             # Equivalent to matplotlib 'interpolation' option. Available options
             # are. No checks are performed.
             # pgfplots/shader=flat|interp|faceted|flat corner|flat mean|faceted
             , 'shader=flat'
-            , 'axis y line=box' ]
+            , 'axis y line=box' 
+            ]
         , 'tikzpicture' : [ 'scale=1', 'xshift=0', 'yshift=0', 'baseline' ]
         }
 
@@ -97,14 +99,17 @@ def addPlotXML( x, y, z=[], id_=0, **kwargs ):
     attr = plotAttr( **kwargs )
     plot = ET.Element( 'addplot+', **attr )
 
-    #  xExpr = kwargs.get( 'x', 'x' )
-    #  yExpr = kwargs.get( 'y', 'y' )
-    #  yExpr = kwargs.get( 'y', 'y' )
     tableElem = ET.Element( 'table', x='x', y='y', z='z' )
 
     every = kwargs.get( 'every', 1)
-    if every > 1:
-        x, y, z = x[::every], y[::every], z[::every]
+    if hasattr( every, '__iter__' ):
+        if len( every ) < 3:
+            every += ( every[-1], )
+        everyx, everyy, everyz = every[0:3]
+    else:
+        everyx, everyy, everyz = every, every, every
+
+    x, y, z = x[::everyx], y[::everyy], z[::everyz]
 
     attachData( tableElem, dict( x=x, y=y, z=z), **kwargs )
     plot.append( tableElem )
@@ -163,7 +168,7 @@ def getDefaultAxis( **kwargs ):
         if kwargs.get( k ):
             axisDefault[k] = '%s' % helper.clean( kwargs[k] )
             if k in [ 'title', 'xlabel', 'ylabel' ]:
-                axisDefault[k] = '{%s}' % helper.clean( kwargs[k] )
+                axisDefault[k] = '{ %s }' % helper.clean( kwargs[k] )
 
     axis = ET.Element( 'axis', **axisDefault )
     return axis
@@ -299,8 +304,10 @@ def tikzpicture( data, **kwargs ):
     # \addlegendentry overwrites previous entry.
     # Make sure that previous axis has appropriate \addlegendimage 
     if axis is not None:
+        legends = kwargs.get( 'legends', [ ] )
         if kwargs.get( 'legend', '' ):
-            attachLegends( pic, kwargs[ 'legend'], **kwargs )
+            legends.append( kwargs[ 'legend' ] )
+        attachLegends( pic, legends, **kwargs )
 
     if axis is not None:
         # Attach label to tikz-picture.
@@ -380,6 +387,8 @@ def standalone( *plots, **kwargs ):
     else:
         print( text )
 
+def main( ):
+    print( 'Nothing to do in main' )
 
 if __name__ == '__main__':
     main()

@@ -2,6 +2,7 @@ PYTHON:=python
 TEST_SCRIPTS:=$(wildcard ./tests/*.py)
 
 all : build docs test
+	pylint -E *.py
 	@echo "All done"
 
 build :

@@ -24,7 +24,7 @@ def which(file):
     return None
 
 latexFound_ = True
-LATEX = which( 'lualatex' ) or which( 'pdflatex' )
+LATEX = which( 'lualatex' ) or which( 'pdflatex' ) 
 if LATEX is None:
     latexFound_ = False
 
@@ -57,10 +57,14 @@ def _sub( name, value, text ):
     return text.replace(  _m( name ), value )
 
 def clean( s ):
-    s = s.replace( "\t", "\\t" )
-    s = s.replace( "\f", "\\f" )
-    s = s.replace( "\b", "\\b" )
-    s = s.replace( "\n", "\\n" )
+    try:
+        s = s.replace( "\t", "\\t" )
+        s = s.replace( "\f", "\\f" )
+        s = s.replace( "\b", "\\b" )
+        s = s.replace( "\n", "\\n" )
+    except Exception as e:
+        print( 'WARN: Failed to cleanup %s of type %s' % (s, type(s)) )
+        raise e
     return s
 
 def keyvalToDict( listofkeyval, attr = { } ):
@@ -108,7 +112,14 @@ def merge_dict( dict1, dict2 ):
 def savefile( text, filename ):
     # definately save a tex file.
     global LATEX
+    assert filename, "Empty filename"
+    assert filename, "Empty filename"
+
     dirname = os.path.dirname( filename )
+    if not dirname:
+        dirname = '.'
+
+    assert dirname, "Could not determine directory of %s" % filename 
     auxD = tempfile.gettempdir( )
     outD = dirname
     basename = os.path.basename( filename )
@@ -118,7 +129,9 @@ def savefile( text, filename ):
         f.write( text )
 
     ext = filename.split( '.' )[-1].strip( ).lower( )
-    texargs = '-aux-directory=%s -output-directory=%s ' % ( auxD, outD )
+    # texargs = '-aux-directory=%s -output-directory=%s ' % ( auxD, outD )
+    # NOTE: Luatex does not have -aux-directory option.
+    texargs = '-output-directory=%s ' % outD
     if ext in [ 'pdf' ]:
         if latexFound_:
             cmd =  "%s -shell-escape %s %s" % (LATEX, texargs, texfile)
